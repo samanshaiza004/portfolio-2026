@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+/* ── Fonts ─────────────────────────────────────────────────────────────────
+   PP Writer, self-hosted. TODO(perf): convert OTF → WOFF2 (~40% smaller).      */
+@font-face {
+  font-family: "PP Writer";
+  src: url("/fonts/PPWriter-Regular.otf") format("opentype");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "PP Writer";
+  src: url("/fonts/PPWriter-Bold.otf") format("opentype");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "PP Writer";
+  src: url("/fonts/PPWriter-RegularItalic.otf") format("opentype");
+  font-weight: 400; font-style: italic; font-display: swap;
+}
+
+/* ── Design tokens ─────────────────────────────────────────────────────────
+   Ported from portfolio-2024/src/design-tokens.ts. HSL channel values are
+   bare (no hsl()) so they compose with Tailwind's hsl(var(--x) / <alpha>).     */
+:root {
+  --background: 0 0% 96%;
+  --foreground: 224 71.4% 4.1%;
+  --card: 0 0% 96%;
+  --card-foreground: 224 71.4% 4.1%;
+  --primary: 220.9 39.3% 11%;
+  --primary-foreground: 210 20% 98%;
+  --secondary: 220 14.3% 92%;
+  --secondary-foreground: 220.9 39.3% 11%;
+  --muted: 220 14.3% 92%;
+  --muted-foreground: 220 8.9% 46.1%;
+  --accent: 220 14.3% 92%;
+  --accent-foreground: 220.9 39.3% 11%;
+  --border: 220 13% 88%;
+  --input: 220 13% 88%;
+  --ring: 224 71.4% 4.1%;
+  --radius: 0.5rem;
+
+  /* identity / brand */
+  --brand-green: #009900;   /* "my fav tunes" heading — Saman's favorite color */
+  --brand-blue:  #00aaff;   /* "under construction" banner */
+
+  /* glass surface — the site's signature treatment */
+  --glass-bg: hsl(0 0% 96% / 0.60);
+  --glass-blur: blur(8px);
+}
+
+/* ── Tailwind v4 theme — expose tokens as utilities (bg-background, etc.) ──── */
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-border: hsl(var(--border));
+  --color-brand-green: var(--brand-green);
+  --color-brand-blue: var(--brand-blue);
+
+  --font-sans: "PP Writer", serif;
+  --font-mono: "Courier New", monospace;
+
+  --radius-base: var(--radius);
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────────*/
+body {
+  font-family: var(--font-sans);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+
+/* ── Neocities animations — all gated on reduced-motion (2024 a11y fix) ──── */
+@keyframes opacity-flicker { 0%,100% { opacity: .2 } 50% { opacity: 1 } }
+@keyframes opacity-pulse   { 0%,100% { opacity: .3 } 50% { opacity: 1 } }
+
+.under-construction {
+  font-family: var(--font-mono);
+  color: var(--brand-blue);
+  animation: opacity-flicker 1s ease-in infinite;
+}
+.handle-pulse { animation: opacity-pulse 3s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .under-construction, .handle-pulse { animation: none; }
+}

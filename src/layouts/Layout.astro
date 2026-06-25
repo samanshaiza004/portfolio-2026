@@ -1,0 +1,55 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Open Graph image, absolute or site-relative */
+  ogImage?: string;
+}
+
+const {
+  title = 'saman shaiza',
+  description = 'my personal website where i share my work, interests, and whatever else ^_^',
+  ogImage = '/favicon.svg',
+} = Astro.props;
+
+const fullTitle = title === 'saman shaiza' ? title : `${title} — saman shaiza`;
+// Astro.site is set in astro.config; canonical falls back gracefully in dev.
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {/* OpenGraph — the 2024 site had none (SEO 3/10) */}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body>
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground">
+      Skip to content
+    </a>
+
+    <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+      <p class="under-construction mb-4 text-sm">&lt;website is under construction&gt;</p>
+      <main id="main">
+        <slot />
+      </main>
+      <footer class="mt-12 border-t border-border pt-4 text-xs text-muted-foreground">
+        <span>© {new Date().getFullYear()} Saman Shaiza.</span>
+        <span class="handle-pulse ml-2">@samanshaiza on everything</span>
+      </footer>
+    </div>
+  </body>
+</html>
