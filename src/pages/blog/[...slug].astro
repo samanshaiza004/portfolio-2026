@@ -1,0 +1,44 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<Layout title={post.data.title} description={post.data.description}>
+  <article class="glass p-6">
+    <a href="/blog/" class="text-sm text-muted-foreground underline underline-offset-2">← all posts</a>
+    <h1 class="mt-4 text-3xl font-bold sm:text-4xl">{post.data.title}</h1>
+    <p class="mt-2 text-sm text-muted-foreground">{fmt(post.data.date)}</p>
+    <div class="mt-3 flex flex-wrap gap-1.5">
+      {post.data.tags.map((tag) => (
+        <span class="rounded-full bg-secondary px-2.5 py-0.5 text-xs text-secondary-foreground">{tag}</span>
+      ))}
+    </div>
+    <div
+      class="prose-content mt-6 max-w-prose
+             [&_a]:underline [&_a]:underline-offset-2
+             [&_blockquote]:border-l-4 [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground
+             [&_code]:rounded [&_code]:bg-secondary [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm
+             [&_h2]:mt-8 [&_h2]:text-2xl [&_h2]:font-bold
+             [&_h3]:mt-6 [&_h3]:text-xl [&_h3]:font-bold
+             [&_li]:my-1 [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6
+             [&_p]:my-4 [&_p]:leading-relaxed
+             [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-foreground [&_pre]:p-4 [&_pre]:text-sm [&_pre]:text-background"
+    >
+      <Content />
+    </div>
+  </article>
+</Layout>
