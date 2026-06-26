@@ -6,21 +6,21 @@ import Layout from '../layouts/Layout.astro';
 const statusItems = [
   {
     label: 'playing',
-    value: 'The Walking Dead: The Telltale Series | Clair Obscur: Expedition 33',
+    value: 'Destiny 2 and Street Fighter VI',
     icon: '/icons/status-playing.gif',
     staticIcon: '/icons/status-playing-static.png',
     alt: 'controller on fire',
   },
   {
     label: 'working on',
-    value: 'studying computer science and running!',
+    value: 'programming and day drinking',
     icon: '/icons/status-working.gif',
     staticIcon: '/icons/status-working-static.png',
     alt: 'usa flag waving',
   },
   {
     label: 'reading',
-    value: '20th Century Boys (again)',
+    value: 'Asadora',
     icon: '/icons/status-reading.gif',
     staticIcon: '/icons/status-reading-static.png',
     alt: 'cheese dancing',
@@ -35,16 +35,12 @@ const statusItems = [
 ];
 const statusUpdated = 'January 16, 2026';
 
-// "my favorite things" — carried over from the 2024 About page.
 const favorites = [
-  { k: 'born', v: '2004' },
-  { k: 'sign', v: 'gemini ♊' },
-  { k: 'game', v: 'the great ace attorney (both of them!)' },
-  { k: 'music', v: 'electronic, maybe some hardstyle' },
-  { k: 'food', v: 'omelette' },
+  { k: 'game', v: 'the entirety of the ace attorney franchise' },
+  { k: 'music', v: 'Vylet Pony, Porter Robinson, and myspacemark' },
   { k: 'drink', v: 'black coffee' },
   { k: 'color', v: 'green' },
-  { k: 'animal', v: 'cats 🐱' },
+  { k: 'animal', v: 'cats i guess? 🐱' },
 ];
 ---
 
@@ -53,14 +49,12 @@ const favorites = [
     <section class="about-intro" data-animate>
       <h1 class="about-title">about</h1>
       <p>
-        Hi, my name is Saman! I like developing software with a strong focus on
-        creating neat web experiences. I created samanshaiza.com to share my work,
+        my name is saman and i like programming sometimes. I created samanshaiza.com to share my work,
         interests, and other things going on in my life.
       </p>
       <p>
-        Beyond programming, I enjoy making music and sound design. You'll find me
-        playing card games (i'm really into MTG and Pokémon TCG rn), drawing,
-        reading, or sharing my knowledge through blogs and technical writing.
+        Beyond programming, i enjoy making music and doing other creative things like drawing,
+        reading, or sharing cool things through blogs and technical writing.
       </p>
     </section>
 
@@ -100,6 +94,25 @@ const favorites = [
         }
       </dl>
     </section>
+
+    <div class="etch"></div>
+
+    <section class="about-misc" data-animate>
+      <p>
+        i've been making music since i was 12 under the names <em>bottlnose</em> and
+        <em>saman shaiza</em> — mostly electronic stuff. Porter Robinson's Nurture has
+        been sitting in the CD slot of my mom's car for years. every time i drive it
+        i put it on. my family is over it. i am not.
+      </p>
+      <p>
+        i'm also making a visual novel called <em>Complexour! You Can't Just Suddenly
+        Fall in Love!</em> — it's about an AGI robot who falls in love with a duck-girl
+        classmate and tries to develop a genuine personality. it's going.
+      </p>
+      <p>
+        oh and i'm Tangkhul Naga from Manipur, India.
+      </p>
+    </section>
   </div>
 </Layout>
 
@@ -120,6 +133,11 @@ const favorites = [
   .status-label { font-family: var(--font-display); font-weight: 700; color: var(--accent); white-space: nowrap; }
   .status-value { color: #4a443c; }
   .status-updated { font-size: 12px; color: #9a9388; margin-top: 14px; }
+
+  .about-misc { position: relative; z-index: 1; padding: 24px 38px 36px; }
+  .about-misc p { font-size: 15px; line-height: 1.7; color: #4a443c; max-width: 540px; }
+  .about-misc p + p { margin-top: 12px; }
+  .about-misc em { font-style: italic; color: #262320; }
 
   .about-faves { position: relative; z-index: 1; padding: 24px 38px 32px; }
   .about-faves-heading { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 14px; }
