@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import LoopMotif from '../components/LoopMotif.astro';
 import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
@@ -11,35 +12,69 @@ const fmt = (d: Date) =>
 ---
 
 <Layout>
-  <section class="glass p-6">
-    <h1 class="text-5xl font-bold tracking-tight sm:text-6xl">welcome to saman!</h1>
-    <p class="mt-2 text-xl text-muted-foreground">pronounced suh-mon</p>
+  <div class="glass home-panel">
+    {/* welcome */}
+    <section class="welcome" data-animate>
+      <div class="welcome-head">
+        <div>
+          <h1 class="welcome-title">welcome to saman!</h1>
+          <p class="welcome-sub">pronounced suh-mon</p>
+        </div>
+        <div class="welcome-motif"><LoopMotif color="var(--accent)" opacity={0.5} /></div>
+      </div>
+      <p class="welcome-intro">
+        my personal website where i like to share my work, interests, and whatever
+        else i can think of ^_^ make yourself at home. ♡
+      </p>
+      <div class="welcome-actions">
+        <a class="green-pill" href="/about"><span>who is this?</span></a>
+        <a class="ghost-btn" href="/contact">contact</a>
+      </div>
+    </section>
 
-    <p class="mt-6 max-w-prose text-muted-foreground">
-      my personal website where i like to share my work, interests, and whatever
-      else i can think of ^_^
-    </p>
+    <div class="etch"></div>
 
-    <hr class="my-6 border-border/40" />
-
-    <h2 class="text-brand-green flex items-center gap-2 text-lg font-bold">
-      recent posts
-    </h2>
-    <ul class="mt-3 space-y-3">
+    {/* recent posts */}
+    <section class="posts">
+      <h2 class="posts-heading">recent posts</h2>
       {
-        recent.map((post) => (
-          <li>
-            <a href={`/blog/${post.id}/`} class="group block">
-              <span class="text-xs text-muted-foreground">{fmt(post.data.date)}</span>
-              <span class="block font-bold group-hover:underline">{post.data.title}</span>
-              <span class="block text-sm text-muted-foreground">{post.data.description}</span>
+        recent.map((post, i) => (
+          <>
+            {i > 0 && <div class="etch" style="opacity:0.6"></div>}
+            <a class="post-row" href={`/blog/${post.id}/`} data-animate>
+              <div class="post-date">{fmt(post.data.date)}</div>
+              <div class="post-title">{post.data.title}</div>
+              <div class="post-blurb">{post.data.description}</div>
             </a>
-          </li>
+          </>
         ))
       }
-    </ul>
-    <a href="/blog/" class="mt-4 inline-block text-sm underline underline-offset-2">
-      all posts →
-    </a>
-  </section>
+      <a class="posts-all" href="/blog/">all posts →</a>
+    </section>
+  </div>
 </Layout>
+
+<style>
+  .home-panel { padding: 0; }
+
+  .welcome { position: relative; z-index: 1; padding: 38px 38px 28px; }
+  .welcome-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+  .welcome-title { font-family: var(--font-display); font-size: 46px; font-weight: 700; line-height: 1.02; letter-spacing: -0.02em; color: #221f1b; }
+  .welcome-sub { font-family: var(--font-display); font-size: 17px; color: #8a8377; margin-top: 6px; }
+  .welcome-motif { width: 116px; flex-shrink: 0; margin-top: 4px; }
+  .welcome-intro { font-size: 16px; line-height: 1.65; color: #4a443c; max-width: 540px; margin-top: 16px; }
+  .welcome-actions { display: flex; gap: 12px; align-items: center; margin-top: 24px; flex-wrap: wrap; }
+
+  .posts { position: relative; z-index: 1; padding: 24px 38px 30px; }
+  .posts-heading { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .post-date { font-size: 12.5px; color: #8a8377; }
+  .post-blurb { font-size: 14.5px; line-height: 1.55; color: #6a6359; }
+  .posts-all { display: inline-block; margin-top: 12px; font-size: 14px; font-weight: 700; color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 520px) {
+    .welcome { padding: 28px 22px 22px; }
+    .welcome-title { font-size: 36px; }
+    .welcome-motif { display: none; }
+    .posts { padding: 20px 22px 24px; }
+  }
+</style>

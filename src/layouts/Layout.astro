@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import NavBox from '../components/NavBox.astro';
+import { ClientRouter } from 'astro:transitions';
 
 interface Props {
   title?: string;
@@ -35,21 +37,121 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="generator" content={Astro.generator} />
+    {/* SPA-style navigation: keeps the persisted NavBox mounted (transition:persist)
+        and swaps only the main column — like the 2024 RootLayout + <Outlet>. */}
+    <ClientRouter />
+    {/* Hide [data-animate] before paint — but only when motion is allowed and
+        JS runs, so no-JS / reduced-motion users never get stuck-hidden content. */}
+    <script is:inline>
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('anim-ready');
+      }
+    </script>
   </head>
   <body>
     <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground">
       Skip to content
     </a>
 
-    <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-      <p class="under-construction mb-4 text-sm">&lt;website is under construction&gt;</p>
-      <main id="main">
-        <slot />
-      </main>
-      <footer class="mt-12 border-t border-border pt-4 text-xs text-muted-foreground">
-        <span>© {new Date().getFullYear()} Saman Shaiza.</span>
-        <span class="handle-pulse ml-2">@samanshaiza on everything</span>
+    <div class="page">
+      <div class="shell">
+        <main id="main">
+          <slot />
+        </main>
+        <NavBox />
+      </div>
+
+      <footer class="site-footer">
+        <p class="under-construction">&lt;website is under construction&gt;</p>
+        <p>
+          <span>© {new Date().getFullYear()} Saman Shaiza.</span>
+          <span class="handle-pulse">@samanshaiza on everything</span>
+        </p>
       </footer>
     </div>
+
+    <style>
+      .page {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 34px 28px;
+      }
+      .shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 330px;
+        gap: 22px;
+        align-items: start;
+      }
+      /* Sidebar stacks below content on narrow screens. */
+      @media (max-width: 900px) {
+        .shell { grid-template-columns: 1fr; }
+      }
+
+      .site-footer {
+        margin-top: 24px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 12px;
+        color: #9a9389;
+      }
+      .site-footer .under-construction { font-size: 12px; }
+      .site-footer .handle-pulse { margin-left: 8px; }
+    </style>
+
+    <script>
+      import Lenis from 'lenis';
+      import { animate } from 'animejs';
+
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Reveal [data-animate] elements. An IntersectionObserver fires immediately
+      // for targets already in view on load (so above-the-fold content isn't left
+      // stuck hidden) and on scroll-in for the rest. Re-run per page (initial load
+      // + each view-transition swap). Self-heals if anything throws.
+      function runEntrances() {
+        if (reduce) return;
+        const els = document.querySelectorAll('[data-animate]');
+        if (!els.length) return;
+        try {
+          const io = new IntersectionObserver((entries, obs) => {
+            entries
+              .filter((e) => e.isIntersecting)
+              .forEach((entry, i) => {
+                animate(entry.target, {
+                  opacity: [0, 1],
+                  translateY: [16, 0],
+                  duration: 650,
+                  delay: i * 70,   // subtle stagger for a batch entering together
+                  ease: 'out(3)',
+                });
+                obs.unobserve(entry.target);
+              });
+          }, { threshold: 0.12 });
+          els.forEach((el) => io.observe(el));
+        } catch (err) {
+          document.documentElement.classList.remove('anim-ready');
+          console.error('entrance animation failed', err);
+        }
+      }
+
+      // One-time setup. The hoisted script re-executes on every swap, so guard
+      // the Lenis instance + listener; only the per-page entrances repeat.
+      if (!(window as any).__siteInit) {
+        (window as any).__siteInit = true;
+
+        if (!reduce) {
+          // Lenis smooth scroll — duration 1.0 (the 2024 site's ~1.4 felt sluggish).
+          const lenis = new Lenis({ duration: 1.0, smoothWheel: true });
+          const raf = (time: number) => { lenis.raf(time); requestAnimationFrame(raf); };
+          requestAnimationFrame(raf);
+        }
+
+        runEntrances();                                              // initial load
+        document.addEventListener('astro:after-swap', runEntrances); // each navigation
+      }
+    </script>
   </body>
 </html>

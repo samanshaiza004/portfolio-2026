@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 /* ── Fonts ─────────────────────────────────────────────────────────────────
-   PP Writer, self-hosted. TODO(perf): convert OTF → WOFF2 (~40% smaller).      */
+   Self-hosted. PP Writer = display/headings; Hanken Grotesk = body/UI.
+   TODO(perf): subset + convert to WOFF2 (~40% smaller than OTF/TTF).           */
 @font-face {
   font-family: "PP Writer";
   src: url("/fonts/PPWriter-Regular.otf") format("opentype");
@@ -17,35 +18,42 @@
   src: url("/fonts/PPWriter-RegularItalic.otf") format("opentype");
   font-weight: 400; font-style: italic; font-display: swap;
 }
+@font-face {
+  font-family: "Hanken Grotesk";
+  src: url("/fonts/HankenGrotesk-VariableFont_wght.ttf") format("truetype");
+  font-weight: 400 700; font-style: normal; font-display: swap;
+}
 
-/* ── Design tokens ─────────────────────────────────────────────────────────
-   Ported from portfolio-2024/src/design-tokens.ts. HSL channel values are
-   bare (no hsl()) so they compose with Tailwind's hsl(var(--x) / <alpha>).     */
+/* ── Design tokens — warm "Aero" system (saman-portfolio-v1) ────────────────
+   Canonical source: scratchpad/tokens/design-tokens.ts. HSL channel values are
+   bare (no hsl()) so they compose with Tailwind's hsl(var(--x) / <alpha>).
+   Dark mode is intentionally NOT supported (declared decision).               */
 :root {
-  --background: 0 0% 96%;
-  --foreground: 224 71.4% 4.1%;
-  --card: 0 0% 96%;
-  --card-foreground: 224 71.4% 4.1%;
-  --primary: 220.9 39.3% 11%;
-  --primary-foreground: 210 20% 98%;
-  --secondary: 220 14.3% 92%;
-  --secondary-foreground: 220.9 39.3% 11%;
-  --muted: 220 14.3% 92%;
-  --muted-foreground: 220 8.9% 46.1%;
-  --accent: 220 14.3% 92%;
-  --accent-foreground: 220.9 39.3% 11%;
-  --border: 220 13% 88%;
-  --input: 220 13% 88%;
-  --ring: 224 71.4% 4.1%;
+  /* warm cream base + warm charcoal text */
+  --background: 37 20% 90%;          /* #ece7df */
+  --foreground: 33 10% 17%;          /* #2f2b26 */
+  --card: 37 20% 90%;
+  --card-foreground: 33 10% 17%;
+  --primary: 30 8% 12%;
+  --primary-foreground: 38 25% 97%;
+  --secondary: 38 16% 91%;
+  --secondary-foreground: 30 8% 12%;
+  --muted: 38 14% 84%;
+  --muted-foreground: 35 8% 46%;
+  --accent-soft: 38 16% 91%;
+  --border: 38 13% 83%;
+  --input: 38 13% 83%;
+  --ring: 33 10% 17%;
   --radius: 0.5rem;
+  --radius-card: 20px;
 
-  /* identity / brand */
-  --brand-green: #009900;   /* "my fav tunes" heading — Saman's favorite color */
-  --brand-blue:  #00aaff;   /* "under construction" banner */
+  /* identity / brand — emerald (June 2026 Aero redesign; brand-blue retired) */
+  --accent: #178a55;
+  --accent-deep: #0f6f43;
+  --pill: linear-gradient(180deg, #4dbd8a 0%, #1f9f64 48%, #178a55 52%, #127a4a 100%);
 
-  /* glass surface — the site's signature treatment */
-  --glass-bg: hsl(0 0% 96% / 0.60);
-  --glass-blur: blur(8px);
+  /* page background — warm "meadow" gradient */
+  --bg-meadow: linear-gradient(160deg, #e7eedd 0%, #f1f1e4 50%, #f6f3e8 100%);
 }
 
 /* ── Tailwind v4 theme — expose tokens as utilities (bg-background, etc.) ──── */
@@ -60,30 +68,189 @@
   --color-secondary-foreground: hsl(var(--secondary-foreground));
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
   --color-border: hsl(var(--border));
-  --color-brand-green: var(--brand-green);
-  --color-brand-blue: var(--brand-blue);
+  --color-accent: var(--accent);
+  --color-accent-deep: var(--accent-deep);
 
-  --font-sans: "PP Writer", serif;
-  --font-mono: "Courier New", monospace;
+  --font-sans: "Hanken Grotesk", system-ui, sans-serif;
+  --font-display: "PP Writer", serif;
+  --font-mono: "Courier New", monospace;          /* retro UI bits (banner) */
+  --font-code: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 
   --radius-base: var(--radius);
 }
 
 /* ── Base ──────────────────────────────────────────────────────────────────*/
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans);       /* Hanken body/UI; headings opt into --font-display */
   background: hsl(var(--background));
   color: hsl(var(--foreground));
+  -webkit-font-smoothing: antialiased;
 }
 
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid hsl(var(--border));
-  border-radius: var(--radius);
+/* ── Materials (warm Aero) — ported from aero-hero-sample.html ──────────────*/
+
+/* Brushed warm-silver chrome — structural surfaces (nav bar, chips, frames). */
+.chrome {
+  background:
+    repeating-linear-gradient(180deg, rgba(255,255,255,0) 0px, rgba(255,255,255,0) 2px, rgba(140,128,110,0.05) 3px),
+    linear-gradient(180deg, #fdfcfa 0%, #f1ede6 7%, #e3ded4 46%, #d4cec2 50%, #e1dcd2 54%, #f1ede6 93%, #fcfbf8 100%);
+  border: 1px solid #c3bdb1; border-top-color: #fffefb;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -1px 0 rgba(255,255,255,0.4), 0 2px 7px rgba(95,84,66,0.16);
 }
+
+/* Warm frosted glass — content cards + navbox. Top-half gloss via ::before.  */
+.glass {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255,253,250,0.84) 0%, rgba(255,253,250,0.5) 120px, rgba(252,249,243,0.46) 100%);
+  border: 1px solid rgba(255,255,253,0.9);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 12px 34px rgba(110,98,78,0.15), 0 2px 6px rgba(110,98,78,0.09);
+  backdrop-filter: blur(11px); -webkit-backdrop-filter: blur(11px);
+  border-radius: var(--radius-card); overflow: hidden;
+}
+.glass::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 130px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0)); pointer-events: none;
+}
+
+/* Green gloss pill — CTAs only, never body text. White label. */
+.green-pill {
+  position: relative; display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 22px; border: 1px solid var(--accent-deep); border-radius: 999px;
+  background: var(--pill); color: #fff; font-weight: 700; font-size: 15px;
+  text-shadow: 0 1px 1px rgba(0,70,40,0.4);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 3px 9px rgba(20,130,82,0.34);
+  cursor: pointer; overflow: hidden; text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.green-pill > span { position: relative; z-index: 1; }
+/* top gloss highlight */
+.green-pill::before {
+  content: ""; position: absolute; inset: 1px 1px 52% 1px; border-radius: 999px 999px 40% 40%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0)); pointer-events: none; z-index: 1;
+}
+/* shimmer sweep on hover */
+.green-pill::after {
+  content: ""; position: absolute; top: 0; left: -75%; width: 50%; height: 100%; z-index: 1;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.4), transparent);
+  transform: skewX(-20deg); pointer-events: none; transition: left 0.55s ease;
+}
+.green-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 7px 18px rgba(20,130,82,0.42);
+}
+.green-pill:hover::after { left: 130%; }
+.green-pill:active { transform: translateY(0); }
+
+.ghost-btn {
+  position: relative;
+  font-size: 14px; font-weight: 600; color: #43403a; text-decoration: none;
+  padding: 11px 18px; border-radius: 999px; border: 1px solid rgba(150,138,118,0.4);
+  background: rgba(255,255,255,0.45);
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+.ghost-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.8);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.ghost-btn:active { transform: translateY(0); }
+
+/* Honor reduced motion: keep the color/contrast cues, drop the movement + shimmer. */
+@media (prefers-reduced-motion: reduce) {
+  .green-pill, .ghost-btn { transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease; }
+  .green-pill:hover, .ghost-btn:hover, .green-pill:active, .ghost-btn:active { transform: none; }
+  .green-pill::after { display: none; }
+}
+
+/* etched divider */
+.etch { height: 1px; background: rgba(150,138,118,0.22); box-shadow: 0 1px 0 rgba(255,255,255,0.7); }
+
+.navlink {
+  display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700;
+  font-family: var(--font-display);
+  color: #43403a; text-decoration: none; padding: 8px 10px; border-radius: 9px;
+  transition: background 0.15s, color 0.15s;
+}
+.navlink:hover { background: rgba(255,255,255,0.6); color: var(--accent); }
+.navlink .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.6); }
+.navlink[aria-current="page"] { background: rgba(255,255,255,0.85); color: var(--accent); }
+
+.post-row { display: block; text-decoration: none; padding: 15px 0; }
+.post-title { font-family: var(--font-display); font-weight: 700; font-size: 19px; color: #262320; line-height: 1.25; margin: 3px 0 5px; transition: color 0.15s; }
+.post-row:hover .post-title { color: var(--accent); }
+
+.scrow { display: flex; align-items: center; gap: 11px; background: rgba(255,255,255,0.42);
+  border: 1px solid rgba(255,255,255,0.7); border-radius: 11px; padding: 8px 11px; }
+.play { width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--accent-deep);
+  background: var(--pill); color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.5); cursor: pointer; }
+.wave { display: flex; align-items: center; gap: 2px; height: 20px; }
+.wave span { width: 2.5px; border-radius: 2px; background: var(--accent); opacity: 0.45; }
+.label { font-family: var(--font-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+
+/* ── Long-form blog content (.prose-content) ────────────────────────────────
+   Headings use PP Writer (display). Inline code gets a warm chip; code BLOCKS
+   are left to Shiki (the `:not(pre) > code` selector is what fixes the old bug
+   where inline-code bg leaked onto highlighted code inside <pre>).            */
+.prose-content { color: #4a443c; font-size: 16px; line-height: 1.7; }
+.prose-content > :first-child { margin-top: 0; }
+
+.prose-content h1,
+.prose-content h2,
+.prose-content h3 {
+  font-family: var(--font-display);
+  color: #262320; font-weight: 700; letter-spacing: -0.015em; line-height: 1.2;
+}
+.prose-content h2 { font-size: 26px; margin: 2rem 0 0.6rem; }
+.prose-content h3 { font-size: 20px; margin: 1.5rem 0 0.4rem; }
+.prose-content p { margin: 1rem 0; }
+
+.prose-content a {
+  color: var(--accent); text-decoration: underline; text-underline-offset: 2px;
+  text-decoration-color: rgba(23,138,85,0.35); transition: text-decoration-color 0.15s;
+}
+.prose-content a:hover { text-decoration-color: var(--accent); }
+
+.prose-content ul, .prose-content ol { padding-left: 1.5rem; margin: 1rem 0; }
+.prose-content ul { list-style: disc; }
+.prose-content ol { list-style: decimal; }
+.prose-content li { margin: 0.35rem 0; }
+
+.prose-content blockquote {
+  border-left: 4px solid hsl(var(--border)); padding-left: 1rem; margin: 1rem 0;
+  font-style: italic; color: hsl(var(--muted-foreground));
+}
+
+/* inline code ONLY (not Shiki-highlighted code inside <pre>) */
+.prose-content :not(pre) > code {
+  font-family: var(--font-code); font-size: 0.875em;
+  background: rgba(150,138,118,0.16); color: #3a352e;
+  padding: 0.12em 0.4em; border-radius: 5px;
+}
+/* Shiki code block — background/colors come from the theme's inline styles */
+.prose-content pre {
+  border-radius: 12px; padding: 16px 18px; margin: 1.25rem 0; overflow-x: auto;
+  font-size: 13.5px; line-height: 1.6;
+  border: 1px solid rgba(0,0,0,0.22);
+  box-shadow: 0 6px 18px rgba(60,50,35,0.16);
+}
+.prose-content pre code { background: transparent; padding: 0; font-family: var(--font-code); }
+
+/* ── Scroll-in entrance (anime.js) ──────────────────────────────────────────
+   `[data-animate]` elements start hidden ONLY when `html.anim-ready` is set —
+   which the head script adds solely when motion is allowed AND JS runs. So
+   no-JS and reduced-motion users always see fully-visible content (no flash,
+   no stuck-hidden state). anime.js then reveals them on scroll-in.            */
+html.anim-ready [data-animate] { opacity: 0; transform: translateY(16px); }
+
+/* ── Lenis smooth scroll (init gated on reduced-motion in Layout) ─────────── */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
 
 /* ── Neocities animations — all gated on reduced-motion (2024 a11y fix) ──── */
 @keyframes opacity-flicker { 0%,100% { opacity: .2 } 50% { opacity: 1 } }
@@ -91,7 +258,7 @@ body {
 
 .under-construction {
   font-family: var(--font-mono);
-  color: var(--brand-blue);
+  color: var(--accent);            /* brand-green (brand-blue retired) */
   animation: opacity-flicker 1s ease-in infinite;
 }
 .handle-pulse { animation: opacity-pulse 3s linear infinite; }

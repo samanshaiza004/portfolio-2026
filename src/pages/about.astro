@@ -1,0 +1,140 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// "what I'm doing right now" — ported from 2024 Home.tsx whatImDoing object.
+// Update these values to reflect current activity; last updated date below.
+const statusItems = [
+  {
+    label: 'playing',
+    value: 'The Walking Dead: The Telltale Series | Clair Obscur: Expedition 33',
+    icon: '/icons/status-playing.gif',
+    staticIcon: '/icons/status-playing-static.png',
+    alt: 'controller on fire',
+  },
+  {
+    label: 'working on',
+    value: 'studying computer science and running!',
+    icon: '/icons/status-working.gif',
+    staticIcon: '/icons/status-working-static.png',
+    alt: 'usa flag waving',
+  },
+  {
+    label: 'reading',
+    value: '20th Century Boys (again)',
+    icon: '/icons/status-reading.gif',
+    staticIcon: '/icons/status-reading-static.png',
+    alt: 'cheese dancing',
+  },
+  {
+    label: 'recently watched',
+    value: 'Talladega Nights',
+    icon: '/icons/status-watched.gif',
+    staticIcon: '/icons/status-watched-static.png',
+    alt: 'spinning star',
+  },
+];
+const statusUpdated = 'January 16, 2026';
+
+// "my favorite things" — carried over from the 2024 About page.
+const favorites = [
+  { k: 'born', v: '2004' },
+  { k: 'sign', v: 'gemini ♊' },
+  { k: 'game', v: 'the great ace attorney (both of them!)' },
+  { k: 'music', v: 'electronic, maybe some hardstyle' },
+  { k: 'food', v: 'omelette' },
+  { k: 'drink', v: 'black coffee' },
+  { k: 'color', v: 'green' },
+  { k: 'animal', v: 'cats 🐱' },
+];
+---
+
+<Layout title="about" description="a little about saman — software, music, card games, and cats.">
+  <div class="glass about-panel">
+    <section class="about-intro" data-animate>
+      <h1 class="about-title">about</h1>
+      <p>
+        Hi, my name is Saman! I like developing software with a strong focus on
+        creating neat web experiences. I created samanshaiza.com to share my work,
+        interests, and other things going on in my life.
+      </p>
+      <p>
+        Beyond programming, I enjoy making music and sound design. You'll find me
+        playing card games (i'm really into MTG and Pokémon TCG rn), drawing,
+        reading, or sharing my knowledge through blogs and technical writing.
+      </p>
+    </section>
+
+    <div class="etch"></div>
+
+    <section class="about-status" data-animate>
+      <h2 class="about-status-heading">◈ what i'm doing rn</h2>
+      <ul class="status-list">
+        {
+          statusItems.map((s) => (
+            <li class="status-row">
+              <picture class="status-icon-wrap">
+                <source media="(prefers-reduced-motion: reduce)" srcset={s.staticIcon} />
+                <img src={s.icon} alt={s.alt} class="status-icon" loading="lazy" />
+              </picture>
+              <span class="status-label">{s.label}:</span>
+              <span class="status-value">{s.value}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="status-updated">last updated: {statusUpdated}</p>
+    </section>
+
+    <div class="etch"></div>
+
+    <section class="about-faves" data-animate>
+      <h2 class="about-faves-heading">★ my favorite things</h2>
+      <dl class="faves-table">
+        {
+          favorites.map((f) => (
+            <div class="faves-row">
+              <dt>{f.k}</dt>
+              <dd>{f.v}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .about-panel { padding: 0; }
+
+  .about-intro { position: relative; z-index: 1; padding: 38px 38px 28px; }
+  .about-title { font-family: var(--font-display); font-size: 46px; font-weight: 700; line-height: 1.02; letter-spacing: -0.02em; color: #221f1b; margin-bottom: 16px; }
+  .about-intro p { font-size: 16px; line-height: 1.65; color: #4a443c; max-width: 560px; }
+  .about-intro p + p { margin-top: 14px; }
+
+  .about-status { position: relative; z-index: 1; padding: 24px 38px 28px; }
+  .about-status-heading { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 14px; }
+  .status-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .status-row { display: flex; align-items: center; gap: 10px; font-size: 15px; }
+  .status-icon-wrap { display: flex; align-items: center; flex-shrink: 0; width: 36px; height: 32px; }
+  .status-icon { max-width: 36px; max-height: 32px; width: auto; height: auto; object-fit: contain; }
+  .status-label { font-family: var(--font-display); font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .status-value { color: #4a443c; }
+  .status-updated { font-size: 12px; color: #9a9388; margin-top: 14px; }
+
+  .about-faves { position: relative; z-index: 1; padding: 24px 38px 32px; }
+  .about-faves-heading { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 14px; }
+
+  .faves-table { display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; border: 1px solid rgba(150,138,118,0.2); }
+  .faves-row { display: grid; grid-template-columns: 120px 1fr; gap: 12px; padding: 10px 14px; align-items: baseline; }
+  .faves-row:nth-child(odd) { background: rgba(255,255,255,0.4); }
+  .faves-row dt { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--accent); }
+  .faves-row dd { font-size: 15px; color: #4a443c; }
+
+  @media (max-width: 520px) {
+    .about-intro { padding: 28px 22px 22px; }
+    .about-title { font-size: 36px; }
+    .about-status { padding: 20px 22px 24px; }
+    .about-faves { padding: 20px 22px 26px; }
+    .faves-row { grid-template-columns: 90px 1fr; }
+  }
+</style>
