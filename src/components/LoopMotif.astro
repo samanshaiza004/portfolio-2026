@@ -1,0 +1,30 @@
+---
+// Concentric-arc "loop" motif — decorative accent for the welcome block.
+// Ported from the LoopMotif fn in aero-hero-sample.html.
+interface Props {
+  color?: string;
+  opacity?: number;
+}
+const { color = 'var(--accent)', opacity = 0.5 } = Astro.props;
+
+const arcs = Array.from({ length: 7 }, (_, i) => {
+  const r = 16 + i * 13;
+  return { r, opacity: (0.9 - i * 0.07) * opacity };
+});
+---
+
+<svg viewBox="0 0 200 122" width="100%" style="display:block" aria-hidden="true">
+  {
+    arcs.map(({ r, opacity: o }) => (
+      <path
+        d={`M ${100 - r} 116 A ${r} ${r} 0 0 1 ${100 + r} 116`}
+        fill="none"
+        stroke={color}
+        stroke-width="5.5"
+        stroke-linecap="round"
+        opacity={o}
+      />
+    ))
+  }
+  <circle cx="100" cy="116" r="5.5" fill={color} opacity={opacity} />
+</svg>

@@ -1,0 +1,199 @@
+---
+// Persistent sidebar — identity, nav, fav tunes, date/clock/weather.
+// Ported from the NAVBOX section of aero-hero-sample.html.
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path.startsWith(href);
+
+// Self-hosted GeoCities nav GIFs (downloaded from the Wayback Machine — the
+// 2024 site hot-linked these, which the brief flagged as fragile).
+const nav = [
+  { name: 'home',    href: '/',        icon: '/icons/nav-home.gif',    alt: 'an epic horse neighing' },
+  { name: 'about',   href: '/about',   icon: '/icons/nav-about.gif',   alt: 'a revolver revolving' },
+  { name: 'blog',    href: '/blog',    icon: '/icons/nav-blog.gif',    alt: 'a book opening' },
+  { name: 'contact', href: '/contact', icon: '/icons/nav-contact.gif', alt: 'a sony cat' },
+];
+
+// Fav tunes — real SoundCloud embeds (ported from the 2024 NavBox). Player
+// colour set to the brand green; thanks to transition:persist on the navbox,
+// a playing track keeps playing while you browse ("listen while you explore").
+const SC = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/soundcloud%253Atracks%253A';
+const SC_OPTS = '&color=%23178a55&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false';
+const tunes = [
+  {
+    track: 'BBY', artist: 'BLADEE',
+    embed: `${SC}1047710536${SC_OPTS}`,
+    trackUrl: 'https://soundcloud.com/bladee1000/bby',
+    artistUrl: 'https://soundcloud.com/bladee1000',
+  },
+  {
+    track: 'what a mario world', artist: 'john "joy" tay',
+    embed: `${SC}1894413747${SC_OPTS}`,
+    trackUrl: 'https://soundcloud.com/john-tay-2-199198505/rrthiel-overworld-ym2151-ymz280b',
+    artistUrl: 'https://soundcloud.com/john-tay-2-199198505',
+  },
+  {
+    track: 'Cassiopeia', artist: 'linked winters',
+    embed: `${SC}1923845720${SC_OPTS}`,
+    trackUrl: 'https://soundcloud.com/linkedwinters/cassiopeia',
+    artistUrl: 'https://soundcloud.com/linkedwinters',
+  },
+];
+---
+
+<aside class="navbox glass" transition:persist="navbox">
+  {/* identity */}
+  <div class="nb-section nb-identity">
+    <div class="nb-avatar"></div>
+    <div>
+      <div class="nb-name">samanshaiza</div>
+      <div class="nb-role"><span class="nb-status-dot"></span>designer &amp; developer</div>
+    </div>
+  </div>
+  <div class="etch"></div>
+
+  {/* navigation */}
+  <nav class="nb-section nb-nav" aria-label="Primary">
+    {
+      nav.map((n) => (
+        <a
+          class="navlink"
+          href={n.href}
+          aria-current={isActive(n.href) ? 'page' : undefined}
+        >
+          <picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset={n.icon.replace('.gif', '-static.png')} />
+            <img class="nav-gif" src={n.icon} alt={n.alt} width="24" height="20" loading="lazy" />
+          </picture>
+          <span>{n.name}</span>
+        </a>
+      ))
+    }
+  </nav>
+  <div class="etch"></div>
+
+  {/* fav tunes — real SoundCloud players */}
+  <div class="nb-section">
+    <p class="nb-heading">♪ my fav tunes rn</p>
+    <p class="nb-tunes-note">you can keep listening while you explore ♡</p>
+    <div class="nb-tunes">
+      {
+        tunes.map((t) => (
+          <div class="nb-tune">
+            <iframe
+              class="nb-sc"
+              title={`SoundCloud — ${t.track} by ${t.artist}`}
+              width="100%"
+              height="120"
+              scrolling="no"
+              frameborder="0"
+              loading="lazy"
+              allow="autoplay"
+              src={t.embed}
+            />
+            <div class="nb-tune-links">
+              <a href={t.artistUrl} target="_blank" rel="noopener noreferrer">{t.artist}</a>
+              <span aria-hidden="true"> · </span>
+              <a href={t.trackUrl} target="_blank" rel="noopener noreferrer">{t.track}</a>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+  <div class="etch"></div>
+
+  {/* date / clock / weather — clock is client-updated; weather is a static
+      placeholder. TODO: Server Island (server:defer) + OPENWEATHER_API_KEY. */}
+  <div class="nb-section nb-weather">
+    <div class="nb-date" data-clock-date>—</div>
+    <div class="nb-time" data-clock-time>—</div>
+    <div class="nb-weather-row">
+      <div>
+        <div class="nb-loc">Frisco, TX</div>
+        <div class="nb-temp">91°F</div>
+        <div class="nb-cond">broken clouds</div>
+      </div>
+      <div class="nb-sun">☀ sun</div>
+    </div>
+  </div>
+</aside>
+
+<script>
+  // The NavBox uses transition:persist — its DOM node survives navigations, so
+  // this runs ONCE per session (guarded), even though the hoisted script
+  // re-executes on each view-transition swap.
+  if (!(window as any).__navboxInit) {
+    (window as any).__navboxInit = true;
+
+    // Live clock. Queries the live nodes each tick (they persist) and ticks
+    // every second — never resets to the "—" placeholder on navigation.
+    const tick = () => {
+      const now = new Date();
+      const dateEl = document.querySelector('[data-clock-date]');
+      const timeEl = document.querySelector('[data-clock-time]');
+      if (dateEl) {
+        dateEl.textContent = now.toLocaleDateString('en-US', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+        });
+      }
+      if (timeEl) {
+        timeEl.textContent = now.toLocaleTimeString('en-US', {
+          hour: 'numeric', minute: '2-digit', second: '2-digit',
+        });
+      }
+    };
+    tick();
+    setInterval(tick, 1000);
+
+    // Active nav highlight. The persisted node keeps its server-rendered
+    // aria-current, so we re-derive it from the URL after every swap.
+    const updateActiveNav = () => {
+      const path = location.pathname;
+      document.querySelectorAll<HTMLAnchorElement>('.navbox .navlink').forEach((a) => {
+        const href = a.getAttribute('href') || '';
+        const active = href === '/' ? path === '/' : path.startsWith(href);
+        if (active) a.setAttribute('aria-current', 'page');
+        else a.removeAttribute('aria-current');
+      });
+    };
+    updateActiveNav();
+    document.addEventListener('astro:after-swap', updateActiveNav);
+  }
+</script>
+
+<style>
+  .navbox { padding: 0; position: sticky; top: 34px; }
+  .nb-section { position: relative; z-index: 1; }
+  .nb-identity { padding: 22px 20px 18px; display: flex; align-items: center; gap: 12px; }
+  .nb-avatar {
+    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+    background: linear-gradient(140deg, #74ddad, #1ba96b);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 5px rgba(26,150,96,0.35);
+  }
+  .nb-name { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: -0.01em; color: #2f2b26; line-height: 1; }
+  .nb-role { font-family: var(--font-sans); font-size: 12.5px; color: #8a8377; margin-top: 4px; display: flex; align-items: center; gap: 6px; }
+  .nb-status-dot { width: 7px; height: 7px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #9be8c0, #1ba96b); }
+
+  .nb-nav { padding: 14px; display: flex; flex-direction: column; gap: 2px; }
+  .nav-gif { width: 24px; height: 20px; object-fit: contain; flex-shrink: 0; image-rendering: auto; }
+
+  .nb-heading { font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--accent); margin-bottom: 12px; }
+  .nb-section:not(.nb-identity):not(.nb-nav):not(.nb-weather) { padding: 16px; }
+  .nb-tunes-note { font-family: var(--font-sans); font-size: 11.5px; color: #8a8377; margin: -6px 0 12px; }
+  .nb-tunes { display: flex; flex-direction: column; gap: 14px; }
+  .nb-tune { font-family: var(--font-sans); min-width: 0; }
+  .nb-sc { display: block; border-radius: 10px; border: 1px solid rgba(255,255,255,0.7); background: rgba(255,255,255,0.42); }
+  .nb-tune-links { font-size: 11px; color: #8a8377; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nb-tune-links a { color: #6a6359; text-decoration: none; }
+  .nb-tune-links a:hover { color: var(--accent); text-decoration: underline; }
+
+  .nb-weather { padding: 18px 20px 22px; font-family: var(--font-sans); }
+  .nb-date { font-size: 13.5px; color: #6a6359; }
+  .nb-time { font-family: var(--font-display); font-size: 30px; font-weight: 700; color: #221f1b; letter-spacing: -0.01em; margin: 2px 0 14px; }
+  .nb-weather-row { display: flex; align-items: flex-end; justify-content: space-between; }
+  .nb-loc { font-size: 13.5px; color: #6a6359; }
+  .nb-temp { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--accent); }
+  .nb-cond { font-size: 12.5px; color: #8a8377; margin-top: 2px; }
+  .nb-sun { font-size: 13px; font-weight: 600; color: #d88a2c; }
+</style>
