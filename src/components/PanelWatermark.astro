@@ -1,0 +1,26 @@
+---
+// Dimmed nested-loop watermark, bleeding off a glass panel's bottom-right corner.
+// Drop it as a child of any `.glass` panel — that panel's backdrop-filter makes it
+// a stacking context, so z-index:-1 keeps the motif behind content (above the panel
+// fill) without per-page z-index wiring, and overflow:hidden clips the bleed.
+import LoopMotif from './LoopMotif.astro';
+interface Props {
+  opacity?: number;
+  count?: number;
+}
+const { opacity = 0.15, count = 18 } = Astro.props;
+---
+
+<div class="panel-watermark" aria-hidden="true">
+  <LoopMotif color="var(--accent)" opacity={opacity} count={count} />
+</div>
+
+<style>
+  .panel-watermark {
+    position: absolute; z-index: -1; pointer-events: none;
+    right: -70px; bottom: -90px; width: clamp(300px, 48%, 480px);
+  }
+  @media (max-width: 520px) {
+    .panel-watermark { right: -90px; bottom: -70px; width: 300px; }
+  }
+</style>

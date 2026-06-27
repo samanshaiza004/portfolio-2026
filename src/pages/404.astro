@@ -1,9 +1,11 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import PanelWatermark from '../components/PanelWatermark.astro';
 ---
 
 <Layout title="404 — not found" description="this page wandered off somewhere.">
   <div class="glass error-panel" data-animate>
+    <PanelWatermark />
     <img class="error-gif" src="/icons/nav-home.gif" alt="an epic horse neighing" width="64" height="44" />
     <h1 class="error-code">404</h1>
     <p class="error-lead">this page wandered off.</p>

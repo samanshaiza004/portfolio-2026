@@ -13,7 +13,7 @@ interface Props {
 const {
   title = 'saman shaiza',
   description = 'my personal website where i share my work, interests, and whatever else ^_^',
-  ogImage = '/favicon.svg',
+  ogImage = '/logo.jpg',
 } = Astro.props;
 
 const fullTitle = title === 'saman shaiza' ? title : `${title} — saman shaiza`;
@@ -26,7 +26,9 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="canonical" href={canonical} />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
@@ -107,30 +109,84 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
 
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // Reveal [data-animate] elements. An IntersectionObserver fires immediately
-      // for targets already in view on load (so above-the-fold content isn't left
-      // stuck hidden) and on scroll-in for the rest. Re-run per page (initial load
-      // + each view-transition swap). Self-heals if anything throws.
+      // Reveal [data-animate] elements. An IntersectionObserver staggers each
+      // batch that enters the viewport (above-the-fold on load + scroll-in),
+      // cascading top-to-bottom. A throttled scroll/raf sweep is the safety net
+      // for jumps IO can't observe (the intersection ratio going 0→0 when an
+      // element is teleported past — scroll restored on reload, a fast scrollbar
+      // drag): it instantly reveals anything already scrolled above the fold.
+      // Re-run per page (initial load + each view-transition swap); the previous
+      // page's observer + listener are torn down first. Self-heals if it throws.
+      let disposeEntrances: (() => void) | null = null;
+
       function runEntrances() {
         if (reduce) return;
-        const els = document.querySelectorAll('[data-animate]');
+        disposeEntrances?.();           // tear down the previous page's wiring
+        disposeEntrances = null;
+
+        const els = [...document.querySelectorAll<HTMLElement>('[data-animate]')];
         if (!els.length) return;
+
         try {
-          const io = new IntersectionObserver((entries, obs) => {
-            entries
-              .filter((e) => e.isIntersecting)
-              .forEach((entry, i) => {
-                animate(entry.target, {
-                  opacity: [0, 1],
-                  translateY: [16, 0],
-                  duration: 650,
-                  delay: i * 70,   // subtle stagger for a batch entering together
-                  ease: 'out(3)',
-                });
-                obs.unobserve(entry.target);
+          const pending = new Set<Element>(els);
+          let io: IntersectionObserver;
+
+          // i < 0 → instant (element already off-screen above the fold);
+          // i >= 0 → staggered entrance for a batch arriving together.
+          const settle = (el: Element, i = -1) => {
+            if (!pending.has(el)) return;
+            pending.delete(el);
+            io.unobserve(el);
+            if (i < 0) {
+              animate(el, { opacity: 1, translateY: 0, duration: 0 });
+            } else {
+              animate(el, {
+                opacity: [0, 1],
+                translateY: [16, 0],
+                duration: 650,
+                delay: i * 80,   // subtle stagger for a batch entering together
+                ease: 'out(3)',
               });
+            }
+          };
+
+          io = new IntersectionObserver((entries) => {
+            // anything reported above the fold gets revealed instantly…
+            entries.forEach((e) => {
+              if (!e.isIntersecting && e.boundingClientRect.top < 0) settle(e.target);
+            });
+            // …and the batch entering the viewport cascades in DOM order.
+            entries
+              .filter((e) => e.isIntersecting && pending.has(e.target))
+              .sort((a, b) =>
+                a.target.compareDocumentPosition(b.target) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
+              )
+              .forEach((entry, i) => settle(entry.target, i));
           }, { threshold: 0.12 });
+
           els.forEach((el) => io.observe(el));
+
+          let queued = false;
+          const sweep = () => {
+            queued = false;
+            pending.forEach((el) => {
+              if (el.getBoundingClientRect().top < 0) settle(el);
+            });
+            if (!pending.size) teardown();
+          };
+          const onScroll = () => {
+            if (!queued) { queued = true; requestAnimationFrame(sweep); }
+          };
+          const teardown = () => {
+            io.disconnect();
+            window.removeEventListener('scroll', onScroll);
+          };
+
+          window.addEventListener('scroll', onScroll, { passive: true });
+          // run once after any scroll position the browser restores post-load
+          requestAnimationFrame(() => requestAnimationFrame(sweep));
+
+          disposeEntrances = teardown;
         } catch (err) {
           document.documentElement.classList.remove('anim-ready');
           console.error('entrance animation failed', err);
