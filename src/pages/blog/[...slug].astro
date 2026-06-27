@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import PanelWatermark from '../../components/PanelWatermark.astro';
 import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 
@@ -19,6 +20,7 @@ const fmt = (d: Date) =>
 
 <Layout title={post.data.title} description={post.data.description}>
   <article class="glass post" data-animate>
+    <PanelWatermark />
     <a href="/blog/" class="post-back">← all posts</a>
     <h1 class="post-h1">{post.data.title}</h1>
     <p class="post-meta">{fmt(post.data.date)}</p>

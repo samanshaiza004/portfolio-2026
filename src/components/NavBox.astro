@@ -1,12 +1,10 @@
 ---
-// Persistent sidebar — identity, nav, fav tunes, date/clock/weather.
-// Ported from the NAVBOX section of aero-hero-sample.html.
+import { statusItems } from '../data/status';
+
 const path = Astro.url.pathname;
 const isActive = (href: string) =>
   href === '/' ? path === '/' : path.startsWith(href);
 
-// Self-hosted GeoCities nav GIFs (downloaded from the Wayback Machine — the
-// 2024 site hot-linked these, which the brief flagged as fragile).
 const nav = [
   { name: 'home',    href: '/',        icon: '/icons/nav-home.gif',    alt: 'an epic horse neighing' },
   { name: 'about',   href: '/about',   icon: '/icons/nav-about.gif',   alt: 'a revolver revolving' },
@@ -14,9 +12,6 @@ const nav = [
   { name: 'contact', href: '/contact', icon: '/icons/nav-contact.gif', alt: 'a sony cat' },
 ];
 
-// Fav tunes — real SoundCloud embeds (ported from the 2024 NavBox). Player
-// colour set to the brand green; thanks to transition:persist on the navbox,
-// a playing track keeps playing while you browse ("listen while you explore").
 const SC = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/soundcloud%253Atracks%253A';
 const SC_OPTS = '&color=%23178a55&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false';
 const tunes = [
@@ -42,17 +37,24 @@ const tunes = [
 ---
 
 <aside class="navbox glass" transition:persist="navbox">
-  {/* identity */}
   <div class="nb-section nb-identity">
-    <div class="nb-avatar"></div>
-    <div>
+    <div class="nb-avatar"><img src="/logo.jpg" alt="samanshaiza logo" width="44" height="44" /></div>
+    <div class="nb-identity-text">
       <div class="nb-name">samanshaiza</div>
-      <div class="nb-role"><span class="nb-status-dot"></span>designer &amp; developer</div>
+      {/* auto-rotating "what i'm doing rn" carousel (data shared with /about) */}
+      <div class="nb-doing" aria-label="what saman is doing right now">
+        {
+          statusItems.map((s, i) => (
+            <span class:list={["nb-doing-item", { 'is-active': i === 0 }]}>
+              <span class="nb-doing-label">{s.label}:</span> <span class="nb-doing-value">{s.value}</span>
+            </span>
+          ))
+        }
+      </div>
     </div>
   </div>
   <div class="etch"></div>
 
-  {/* navigation */}
   <nav class="nb-section nb-nav" aria-label="Primary">
     {
       nav.map((n) => (
@@ -74,8 +76,12 @@ const tunes = [
 
   {/* fav tunes — real SoundCloud players */}
   <div class="nb-section">
-    <p class="nb-heading">♪ my fav tunes rn</p>
-    <p class="nb-tunes-note">you can keep listening while you explore ♡</p>
+    {/* heading doubles as a hover/focus tooltip trigger (ported from the 2024
+        HoverCard) — cursor stays the default arrow, like the original. */}
+    <div class="nb-tunes-hc">
+      <p class="nb-heading nb-tunes-trigger" tabindex="0" aria-describedby="nb-tunes-tip">♪ my fav tunes rn</p>
+      <span class="nb-tunes-tip" id="nb-tunes-tip" role="tooltip">you can keep listening while you explore ♡</span>
+    </div>
     <div class="nb-tunes">
       {
         tunes.map((t) => (
@@ -139,7 +145,7 @@ const tunes = [
       }
       if (timeEl) {
         timeEl.textContent = now.toLocaleTimeString('en-US', {
-          hour: 'numeric', minute: '2-digit', second: '2-digit',
+          hour: 'numeric', minute: '2-digit',
         });
       }
     };
@@ -159,6 +165,31 @@ const tunes = [
     };
     updateActiveNav();
     document.addEventListener('astro:after-swap', updateActiveNav);
+
+    // "what i'm doing rn" carousel — cross-fade through the status items under
+    // the name. Auto-rotates only when motion is allowed; pauses on hover/focus
+    // so there's always a way to stop the auto-updating content (a11y).
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const doing = document.querySelector('.nb-doing');
+    const items = doing
+      ? Array.from(doing.querySelectorAll<HTMLElement>('.nb-doing-item'))
+      : [];
+    if (doing && items.length > 1 && !reduceMotion) {
+      let idx = 0;
+      let timer: ReturnType<typeof setInterval> | null = null;
+      const rotate = () => {
+        items[idx].classList.remove('is-active');
+        idx = (idx + 1) % items.length;
+        items[idx].classList.add('is-active');
+      };
+      const start = () => { if (!timer) timer = setInterval(rotate, 3400); };
+      const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
+      start();
+      doing.addEventListener('mouseenter', stop);
+      doing.addEventListener('mouseleave', start);
+      doing.addEventListener('focusin', stop);
+      doing.addEventListener('focusout', start);
+    }
   }
 </script>
 
@@ -166,21 +197,76 @@ const tunes = [
   .navbox { padding: 0; position: sticky; top: 34px; }
   .nb-section { position: relative; z-index: 1; }
   .nb-identity { padding: 22px 20px 18px; display: flex; align-items: center; gap: 12px; }
+  /* Logo avatar — the round mask hides the source JPG's dark corners; the inner
+     image is zoomed past the frame (overflow-clipped) to crop the silvery
+     vignette so only the glossy mark shows. */
   .nb-avatar {
-    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
-    background: linear-gradient(140deg, #74ddad, #1ba96b);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 5px rgba(26,150,96,0.35);
+    position: relative; width: 44px; height: 44px; flex-shrink: 0;
+    border-radius: 50%; overflow: hidden; background: #fff;
+    border: 1px solid rgba(255,255,255,0.9);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 6px rgba(110,98,78,0.28);
   }
+  .nb-avatar img { position: absolute; inset: -12%; width: 124%; height: 124%; object-fit: cover; display: block; }
+  .nb-identity-text { min-width: 0; flex: 1; }
   .nb-name { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: -0.01em; color: #2f2b26; line-height: 1; }
-  .nb-role { font-family: var(--font-sans); font-size: 12.5px; color: #8a8377; margin-top: 4px; display: flex; align-items: center; gap: 6px; }
-  .nb-status-dot { width: 7px; height: 7px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #9be8c0, #1ba96b); }
+
+  /* "what i'm doing rn" carousel — items stack and cross-fade (driven by JS) */
+  .nb-doing { position: relative; margin-top: 5px; min-height: 2.7em; font-family: var(--font-sans); font-size: 12px; line-height: 1.35; }
+  .nb-doing-item {
+    position: absolute; inset: 0; opacity: 0;
+    transition: opacity 0.55s ease;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .nb-doing-item.is-active { opacity: 1; }
+  .nb-doing-label { color: var(--accent); font-weight: 700; }
+  .nb-doing-value { color: #8a8377; }
+  @media (prefers-reduced-motion: reduce) {
+    .nb-doing-item { transition: none; }
+  }
 
   .nb-nav { padding: 14px; display: flex; flex-direction: column; gap: 2px; }
   .nav-gif { width: 24px; height: 20px; object-fit: contain; flex-shrink: 0; image-rendering: auto; }
 
   .nb-heading { font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--accent); margin-bottom: 12px; }
   .nb-section:not(.nb-identity):not(.nb-nav):not(.nb-weather) { padding: 16px; }
-  .nb-tunes-note { font-family: var(--font-sans); font-size: 11.5px; color: #8a8377; margin: -6px 0 12px; }
+
+  /* fav-tunes heading as a hover/focus tooltip trigger (2024 HoverCard port) */
+  .nb-tunes-hc { position: relative; display: inline-block; }
+  .nb-tunes-trigger {
+    margin-bottom: 12px;
+    display: inline-flex; align-items: center; gap: 6px;
+    cursor: default; user-select: none; -webkit-user-select: none;
+    text-decoration: underline dotted transparent; text-underline-offset: 4px;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+  }
+  .nb-tunes-trigger:hover,
+  .nb-tunes-trigger:focus-visible {
+    color: var(--accent-deep);
+    text-decoration-color: rgba(15,111,67,0.55);
+    outline: none;
+  }
+  .nb-tunes-tip {
+    position: absolute; top: calc(100% - 4px); left: 0; z-index: 20;
+    width: max-content; max-width: 240px;
+    font-family: var(--font-sans); font-size: 11.5px; line-height: 1.45; font-weight: 400;
+    color: #6a6359;
+    background: rgba(255,253,250,0.96);
+    border: 1px solid rgba(255,255,255,0.9);
+    border-radius: 10px; padding: 8px 11px;
+    box-shadow: 0 8px 22px rgba(110,98,78,0.2);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    opacity: 0; visibility: hidden; transform: translateY(-4px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+    pointer-events: none;
+  }
+  .nb-tunes-hc:hover .nb-tunes-tip,
+  .nb-tunes-trigger:focus-visible + .nb-tunes-tip {
+    opacity: 1; visibility: visible; transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nb-tunes-trigger, .nb-tunes-tip { transition: none; }
+    .nb-tunes-tip { transform: none; }
+  }
   .nb-tunes { display: flex; flex-direction: column; gap: 14px; }
   .nb-tune { font-family: var(--font-sans); min-width: 0; }
   .nb-sc { display: block; border-radius: 10px; border: 1px solid rgba(255,255,255,0.7); background: rgba(255,255,255,0.42); }

@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import PanelWatermark from '../components/PanelWatermark.astro';
 
 // Public handles only. The 2024 page also listed a phone number — deliberately
 // dropped (the brief flagged it as leaked personal info; do not carry it over).
@@ -14,6 +15,7 @@ const isExternal = (href: string | null) => !!href && href.startsWith('http');
 
 <Layout title="contact" description="get in touch with saman — email, github, linkedin, discord.">
   <div class="glass contact-panel">
+    <PanelWatermark />
     <section class="contact-head" data-animate>
       <h1 class="contact-title">get in touch</h1>
       <p class="contact-sub">feel free to reach out through any of these channels</p>

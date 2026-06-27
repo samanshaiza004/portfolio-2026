@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import LoopMotif from '../components/LoopMotif.astro';
+import PanelWatermark from '../components/PanelWatermark.astro';
 import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
@@ -13,6 +13,8 @@ const fmt = (d: Date) =>
 
 <Layout>
   <div class="glass home-panel">
+    <PanelWatermark />
+
     {/* welcome */}
     <section class="welcome" data-animate>
       <div class="welcome-head">
@@ -20,7 +22,6 @@ const fmt = (d: Date) =>
           <h1 class="welcome-title">welcome to saman!</h1>
           <p class="welcome-sub">pronounced suh-mon</p>
         </div>
-        <div class="welcome-motif"><LoopMotif color="var(--accent)" opacity={0.5} /></div>
       </div>
       <p class="welcome-intro">
         my personal website where i like to share my work, interests, and whatever
@@ -36,7 +37,7 @@ const fmt = (d: Date) =>
 
     {/* recent posts */}
     <section class="posts">
-      <h2 class="posts-heading">recent posts</h2>
+      <h2 class="posts-heading" data-animate>recent posts</h2>
       {
         recent.map((post, i) => (
           <>
@@ -61,7 +62,6 @@ const fmt = (d: Date) =>
   .welcome-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
   .welcome-title { font-family: var(--font-display); font-size: 46px; font-weight: 700; line-height: 1.02; letter-spacing: -0.02em; color: #221f1b; }
   .welcome-sub { font-family: var(--font-display); font-size: 17px; color: #8a8377; margin-top: 6px; }
-  .welcome-motif { width: 116px; flex-shrink: 0; margin-top: 4px; }
   .welcome-intro { font-size: 16px; line-height: 1.65; color: #4a443c; max-width: 540px; margin-top: 16px; }
   .welcome-actions { display: flex; gap: 12px; align-items: center; margin-top: 24px; flex-wrap: wrap; }
 
@@ -74,7 +74,6 @@ const fmt = (d: Date) =>
   @media (max-width: 520px) {
     .welcome { padding: 28px 22px 22px; }
     .welcome-title { font-size: 36px; }
-    .welcome-motif { display: none; }
     .posts { padding: 20px 22px 24px; }
   }
 </style>

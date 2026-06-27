@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import PanelWatermark from '../../components/PanelWatermark.astro';
 import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
@@ -11,8 +12,9 @@ const fmt = (d: Date) =>
 
 <Layout title="blog" description="posts on code, tools, and whatever else.">
   <div class="glass blog-panel">
+    <PanelWatermark />
     <section class="blog-body">
-      <h1 class="blog-title">blog</h1>
+      <h1 class="blog-title" data-animate>blog</h1>
       {
         posts.map((post, i) => (
           <>
