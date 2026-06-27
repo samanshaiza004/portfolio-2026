@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import PanelWatermark from '../components/PanelWatermark.astro';
-import { statusItems, statusUpdated } from '../data/status';
+import { statusItems } from '../data/status';
 
 const favorites = [
   { k: 'game', v: 'the entirety of the ace attorney franchise' },
@@ -25,27 +25,6 @@ const favorites = [
         Beyond programming, i enjoy making music and doing other creative things like drawing,
         reading, or sharing cool things through blogs and technical writing.
       </p>
-    </section>
-
-    <div class="etch"></div>
-
-    <section class="about-status" data-animate>
-      <h2 class="about-status-heading">◈ what i'm doing rn</h2>
-      <ul class="status-list">
-        {
-          statusItems.map((s) => (
-            <li class="status-row">
-              <picture class="status-icon-wrap">
-                <source media="(prefers-reduced-motion: reduce)" srcset={s.staticIcon} />
-                <img src={s.icon} alt={s.alt} class="status-icon" loading="lazy" />
-              </picture>
-              <span class="status-label">{s.label}:</span>
-              <span class="status-value">{s.value}</span>
-            </li>
-          ))
-        }
-      </ul>
-      <p class="status-updated">last updated: {statusUpdated}</p>
     </section>
 
     <div class="etch"></div>

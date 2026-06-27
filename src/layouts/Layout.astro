@@ -84,9 +84,18 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
         gap: 22px;
         align-items: start;
       }
-      /* Sidebar stacks below content on narrow screens. */
+      /* min-width:0 lets the content column shrink below its content's
+         min-content width — without it a wide <pre> blows the grid track out
+         past the viewport on mobile (horizontal overflow). */
+      #main { min-width: 0; }
+      /* Sidebar stacks below content on narrow screens. minmax(0,1fr) (NOT a
+         bare 1fr, which is minmax(auto,1fr)) keeps the single column capped to
+         the viewport so code blocks scroll inside their box instead of overflowing. */
       @media (max-width: 900px) {
-        .shell { grid-template-columns: 1fr; }
+        .shell { grid-template-columns: minmax(0, 1fr); }
+      }
+      @media (max-width: 600px) {
+        .page { padding: 18px 14px; }
       }
 
       .site-footer {
@@ -162,7 +171,12 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
                 a.target.compareDocumentPosition(b.target) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
               )
               .forEach((entry, i) => settle(entry.target, i));
-          }, { threshold: 0.12 });
+          }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
+          // threshold:0 (not a fraction like 0.12) means "any part in view" —
+          // a 0.12 area threshold is never met by elements taller than ~8×
+          // the viewport (e.g. a long blog post on mobile), leaving them stuck
+          // hidden. The -8% bottom rootMargin holds the entrance until the
+          // element is a touch into view rather than firing on the first pixel.
 
           els.forEach((el) => io.observe(el));
 
