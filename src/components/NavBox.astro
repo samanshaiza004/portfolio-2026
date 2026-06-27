@@ -1,5 +1,5 @@
 ---
-import { statusItems } from '../data/status';
+import { statusItems, statusUpdated } from '../data/status';
 
 const path = Astro.url.pathname;
 const isActive = (href: string) =>
@@ -41,7 +41,6 @@ const tunes = [
     <div class="nb-avatar"><img src="/logo.jpg" alt="samanshaiza logo" width="44" height="44" /></div>
     <div class="nb-identity-text">
       <div class="nb-name">samanshaiza</div>
-      {/* auto-rotating "what i'm doing rn" carousel (data shared with /about) */}
       <div class="nb-doing" aria-label="what saman is doing right now">
         {
           statusItems.map((s, i) => (
@@ -50,7 +49,10 @@ const tunes = [
             </span>
           ))
         }
+        
       </div>
+            <p class="status-updated">last updated: {statusUpdated}</p>
+
     </div>
   </div>
   <div class="etch"></div>
@@ -195,6 +197,8 @@ const tunes = [
 
 <style>
   .navbox { padding: 0; position: sticky; top: 34px; }
+  /* Stacked below content on mobile — don't pin the tall sidebar to the top. */
+  @media (max-width: 900px) { .navbox { position: static; } }
   .nb-section { position: relative; z-index: 1; }
   .nb-identity { padding: 22px 20px 18px; display: flex; align-items: center; gap: 12px; }
   /* Logo avatar — the round mask hides the source JPG's dark corners; the inner
@@ -259,6 +263,8 @@ const tunes = [
     transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
     pointer-events: none;
   }
+  .status-updated { font-size: 12px; color: #9a9388; }
+
   .nb-tunes-hc:hover .nb-tunes-tip,
   .nb-tunes-trigger:focus-visible + .nb-tunes-tip {
     opacity: 1; visibility: visible; transform: translateY(0);
