@@ -119,10 +119,10 @@ const tunes = [
     <div class="nb-weather-row">
       <div>
         <div class="nb-loc">Frisco, TX</div>
-        <div class="nb-temp">91°F</div>
-        <div class="nb-cond">broken clouds</div>
+        <div class="nb-temp" data-weather-temp>—°F</div>
+        <div class="nb-cond" data-weather-cond>—</div>
       </div>
-      <div class="nb-sun">☀ sun</div>
+      <div class="nb-sun" data-weather-icon>☀</div>
     </div>
   </div>
 </aside>
@@ -153,6 +153,46 @@ const tunes = [
     };
     tick();
     setInterval(tick, 1000);
+
+    // Live weather — Open-Meteo (keyless, CORS-friendly), Frisco TX, °F. Replaces
+    // the 2024 client fetch that leaked an OpenWeather key; no key, no server.
+    // Maps WMO weather codes to a label + glyph; fails silently (placeholders stay).
+    const wmo = (c: number): { icon: string; text: string } => {
+      if (c === 0) return { icon: '☀', text: 'clear sky' };
+      if (c === 1) return { icon: '🌤', text: 'mainly clear' };
+      if (c === 2) return { icon: '⛅', text: 'partly cloudy' };
+      if (c === 3) return { icon: '☁', text: 'overcast' };
+      if (c === 45 || c === 48) return { icon: '🌫', text: 'fog' };
+      if (c >= 51 && c <= 57) return { icon: '🌦', text: 'drizzle' };
+      if (c >= 61 && c <= 67) return { icon: '🌧', text: 'rain' };
+      if (c >= 71 && c <= 77) return { icon: '🌨', text: 'snow' };
+      if (c >= 80 && c <= 82) return { icon: '🌦', text: 'rain showers' };
+      if (c >= 85 && c <= 86) return { icon: '🌨', text: 'snow showers' };
+      if (c >= 95) return { icon: '⛈', text: 'thunderstorm' };
+      return { icon: '☁', text: 'cloudy' };
+    };
+    const loadWeather = async () => {
+      try {
+        const res = await fetch(
+          'https://api.open-meteo.com/v1/forecast?latitude=33.1507&longitude=-96.8236' +
+          '&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=America/Chicago',
+        );
+        if (!res.ok) return;
+        const cur = (await res.json())?.current;
+        if (!cur || typeof cur.temperature_2m !== 'number') return;
+        const { icon, text } = wmo(cur.weather_code);
+        const tempEl = document.querySelector('[data-weather-temp]');
+        const condEl = document.querySelector('[data-weather-cond]');
+        const iconEl = document.querySelector('[data-weather-icon]');
+        if (tempEl) tempEl.textContent = `${Math.round(cur.temperature_2m)}°F`;
+        if (condEl) condEl.textContent = text;
+        if (iconEl) iconEl.textContent = `${icon} ${text.split(' ')[0]}`;
+      } catch {
+        /* offline / blocked — leave the "—" placeholders, never a broken card */
+      }
+    };
+    loadWeather();
+    setInterval(loadWeather, 1_800_000); // refresh every 30 min (matches 2024)
 
     // Active nav highlight. The persisted node keeps its server-rendered
     // aria-current, so we re-derive it from the URL after every swap.
