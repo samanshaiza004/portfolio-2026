@@ -7,7 +7,6 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  // TODO: confirm production domain (Netlify). Used for canonical URLs + sitemap.
   site: 'https://samanshaiza.com',
 
   vite: {
