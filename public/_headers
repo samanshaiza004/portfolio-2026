@@ -1,0 +1,31 @@
+# Netlify response headers — portfolio-2026
+# Security headers fix Lighthouse Best Practices (missing headers → 77/100).
+# Cache headers fix "use efficient cache lifetimes" diagnostic.
+
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; frame-src https://w.soundcloud.com; connect-src 'self' https://api.open-meteo.com; font-src 'self'; object-src 'none'; media-src 'none'
+
+# Astro-hashed assets are content-addressed — cache forever
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Self-hosted fonts — long-lived, same hash per file
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Nav GIFs and status icons — change rarely
+/icons/*
+  Cache-Control: public, max-age=604800
+
+# Favicons — browser re-checks infrequently; one day is plenty
+/favicon-*.png
+  Cache-Control: public, max-age=86400
+
+/apple-touch-icon.png
+  Cache-Control: public, max-age=86400

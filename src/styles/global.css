@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
 /* ── Fonts ─────────────────────────────────────────────────────────────────
-   Self-hosted. PP Writer = display/headings; Hanken Grotesk = body/UI.
-   TODO(perf): subset + convert to WOFF2 (~40% smaller than OTF/TTF).           */
+   Self-hosted WOFF2 (subset Latin + symbols). PP Writer = display/headings;
+   Hanken Grotesk = body/UI. Both preloaded in Layout.astro head.              */
 @font-face {
   font-family: "PP Writer";
-  src: url("/fonts/PPWriter-Regular.otf") format("opentype");
+  src: url("/fonts/PPWriter-Regular.woff2") format("woff2");
   font-weight: 400; font-style: normal; font-display: swap;
 }
 @font-face {
   font-family: "PP Writer";
-  src: url("/fonts/PPWriter-Bold.otf") format("opentype");
+  src: url("/fonts/PPWriter-Bold.woff2") format("woff2");
   font-weight: 700; font-style: normal; font-display: swap;
 }
 @font-face {
   font-family: "PP Writer";
-  src: url("/fonts/PPWriter-RegularItalic.otf") format("opentype");
+  src: url("/fonts/PPWriter-RegularItalic.woff2") format("woff2");
   font-weight: 400; font-style: italic; font-display: swap;
 }
 @font-face {
   font-family: "Hanken Grotesk";
-  src: url("/fonts/HankenGrotesk-VariableFont_wght.ttf") format("truetype");
+  src: url("/fonts/HankenGrotesk-VariableFont_wght.woff2") format("woff2");
   font-weight: 400 700; font-style: normal; font-display: swap;
 }
 
@@ -89,15 +89,6 @@ body {
 }
 
 /* ── Materials (warm Aero) — ported from aero-hero-sample.html ──────────────*/
-
-/* Brushed warm-silver chrome — structural surfaces (nav bar, chips, frames). */
-.chrome {
-  background:
-    repeating-linear-gradient(180deg, rgba(255,255,255,0) 0px, rgba(255,255,255,0) 2px, rgba(140,128,110,0.05) 3px),
-    linear-gradient(180deg, #fdfcfa 0%, #f1ede6 7%, #e3ded4 46%, #d4cec2 50%, #e1dcd2 54%, #f1ede6 93%, #fcfbf8 100%);
-  border: 1px solid #c3bdb1; border-top-color: #fffefb;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -1px 0 rgba(255,255,255,0.4), 0 2px 7px rgba(95,84,66,0.16);
-}
 
 /* Warm frosted glass — content cards + navbox. Top-half gloss via ::before.  */
 .glass {
@@ -181,13 +172,6 @@ body {
 .post-title { font-family: var(--font-display); font-weight: 700; font-size: 19px; color: #262320; line-height: 1.25; margin: 3px 0 5px; transition: color 0.15s; }
 .post-row:hover .post-title { color: var(--accent); }
 
-.scrow { display: flex; align-items: center; gap: 11px; background: rgba(255,255,255,0.42);
-  border: 1px solid rgba(255,255,255,0.7); border-radius: 11px; padding: 8px 11px; }
-.play { width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--accent-deep);
-  background: var(--pill); color: #fff; display: flex; align-items: center; justify-content: center;
-  font-size: 11px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.5); cursor: pointer; }
-.wave { display: flex; align-items: center; gap: 2px; height: 20px; }
-.wave span { width: 2.5px; border-radius: 2px; background: var(--accent); opacity: 0.45; }
 .label { font-family: var(--font-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
 
 /* ── Long-form blog content (.prose-content) ────────────────────────────────

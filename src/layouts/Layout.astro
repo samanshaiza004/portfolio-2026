@@ -2,23 +2,28 @@
 import '../styles/global.css';
 import NavBox from '../components/NavBox.astro';
 import { ClientRouter } from 'astro:transitions';
+import logoAsset from '../assets/logo.jpg';
 
 interface Props {
   title?: string;
   description?: string;
-  /** Open Graph image, absolute or site-relative */
+  /** Open Graph image — absolute URL, or site-relative path (resolved to absolute at build) */
   ogImage?: string;
 }
 
 const {
   title = 'saman shaiza',
   description = 'my personal website where i share my work, interests, and whatever else ^_^',
-  ogImage = '/logo.jpg',
+  ogImage = logoAsset.src,
 } = Astro.props;
 
 const fullTitle = title === 'saman shaiza' ? title : `${title} — saman shaiza`;
 // Astro.site is set in astro.config; canonical falls back gracefully in dev.
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.url.pathname;
+// og:image must be an absolute URL for social scrapers.
+const ogImageUrl = Astro.site && !ogImage.startsWith('http')
+  ? new URL(ogImage.startsWith('/') ? ogImage : `/${ogImage}`, Astro.site).href
+  : ogImage;
 ---
 
 <!doctype html>
@@ -26,6 +31,8 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preload" href="/fonts/PPWriter-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/HankenGrotesk-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -36,7 +43,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
     <meta property="og:type" content="website" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={ogImage} />
+    <meta property="og:image" content={ogImageUrl} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="generator" content={Astro.generator} />
     {/* SPA-style navigation: keeps the persisted NavBox mounted (transition:persist)
@@ -106,7 +113,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
         justify-content: space-between;
         gap: 8px;
         font-size: 12px;
-        color: #9a9389;
+        color: #6a6359;
       }
       .site-footer .under-construction { font-size: 12px; }
       .site-footer .handle-pulse { margin-left: 8px; }

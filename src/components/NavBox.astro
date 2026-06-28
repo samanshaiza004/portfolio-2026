@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import logoSrc from '../assets/logo.jpg';
 import { statusItems, statusUpdated } from '../data/status';
 
 const path = Astro.url.pathname;
@@ -38,7 +40,7 @@ const tunes = [
 
 <aside class="navbox glass" transition:persist="navbox">
   <div class="nb-section nb-identity">
-    <div class="nb-avatar"><img src="/logo.jpg" alt="samanshaiza logo" width="44" height="44" /></div>
+    <div class="nb-avatar"><Image src={logoSrc} alt="samanshaiza logo" width="44" height="44" /></div>
     <div class="nb-identity-text">
       <div class="nb-name">samanshaiza</div>
       <div class="nb-doing" aria-label="what saman is doing right now">
@@ -111,8 +113,7 @@ const tunes = [
   </div>
   <div class="etch"></div>
 
-  {/* date / clock / weather — clock is client-updated; weather is a static
-      placeholder. TODO: Server Island (server:defer) + OPENWEATHER_API_KEY. */}
+  {/* date / clock / weather — Open-Meteo (keyless), Frisco TX, updated every 30 min */}
   <div class="nb-section nb-weather">
     <div class="nb-date" data-clock-date>—</div>
     <div class="nb-time" data-clock-time>—</div>
@@ -263,7 +264,7 @@ const tunes = [
   }
   .nb-doing-item.is-active { opacity: 1; }
   .nb-doing-label { color: var(--accent); font-weight: 700; }
-  .nb-doing-value { color: #8a8377; }
+  .nb-doing-value { color: #6a6359; }
   @media (prefers-reduced-motion: reduce) {
     .nb-doing-item { transition: none; }
   }
@@ -303,7 +304,7 @@ const tunes = [
     transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
     pointer-events: none;
   }
-  .status-updated { font-size: 12px; color: #9a9388; }
+  .status-updated { font-size: 12px; color: #6a6359; }
 
   .nb-tunes-hc:hover .nb-tunes-tip,
   .nb-tunes-trigger:focus-visible + .nb-tunes-tip {
@@ -316,7 +317,7 @@ const tunes = [
   .nb-tunes { display: flex; flex-direction: column; gap: 14px; }
   .nb-tune { font-family: var(--font-sans); min-width: 0; }
   .nb-sc { display: block; border-radius: 10px; border: 1px solid rgba(255,255,255,0.7); background: rgba(255,255,255,0.42); }
-  .nb-tune-links { font-size: 11px; color: #8a8377; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nb-tune-links { font-size: 11px; color: #6a6359; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .nb-tune-links a { color: #6a6359; text-decoration: none; }
   .nb-tune-links a:hover { color: var(--accent); text-decoration: underline; }
 
@@ -326,6 +327,6 @@ const tunes = [
   .nb-weather-row { display: flex; align-items: flex-end; justify-content: space-between; }
   .nb-loc { font-size: 13.5px; color: #6a6359; }
   .nb-temp { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--accent); }
-  .nb-cond { font-size: 12.5px; color: #8a8377; margin-top: 2px; }
+  .nb-cond { font-size: 12.5px; color: #6a6359; margin-top: 2px; }
   .nb-sun { font-size: 13px; font-weight: 600; color: #d88a2c; }
 </style>
