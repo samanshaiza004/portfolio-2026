@@ -2,7 +2,6 @@
 title: Building an Audio Sample Explorer in Electron Part 1 - Streaming and Custom Protocols
 date: "2024-9-03"
 description: "This post is part one of a series of the different tribulations to develop punks, my experimental audio sample explorer made in Electron."
-tags: ["punks", "electron"]
 ---
 
 This post is part one of a series of the different tribulations to develop [punks](https://www.github.com/samanshaiza004/punks), my experimental audio sample explorer made in Electron.

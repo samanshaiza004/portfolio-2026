@@ -2,7 +2,6 @@
 title: You should give Linux a shot
 date: "2024-7-29"
 description: "Linux often carries a reputation of being complicated and overly technical. For a long time, I shared that perception. But after giving it a try, I realized how much it has to offer."
-tags: ["linux", "opinion"]
 ---
 
 ## What is Linux?
