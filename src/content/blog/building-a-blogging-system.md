@@ -2,7 +2,6 @@
 title: Building a Blogging System for My Personal Website
 date: "2024-11-07"
 description: "So naturally, as a programmer, I wanted to create my own blog. And like any self-respecting programmer, I decided to build my own blogging system from scratch."
-tags: ["tutorial", "react"]
 ---
 
 I love reading blogs. There's something special about finding people smarter than yourself and learning from their experiences and insights through their writing. So naturally, as a programmer, I wanted to create my own blog. And like any self-respecting programmer, I decided to build my own blogging system from scratch. Like a personal rite of sorts.
@@ -122,7 +121,7 @@ const posts = Object.entries(modules).map(([path, content]) => {
 });
 
 export const blogPosts = posts.sort(
-  (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
 );
 ```
 
