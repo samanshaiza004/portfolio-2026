@@ -8,7 +8,7 @@ description: "My old portfolio shipped 519 KB of mandatory JavaScript to render 
 
 My 2024 portfolio was an app pretending to be a content site. My 2026 portfolio is a content site pretending to be an app.
 
-To be honest, the 2024 build was sloppy, juvenile, reaching for more than I knew how to do cleanly at the time. ~40 dependencies, a lot of them just there to "look cool." This is the rebuilt-from-scratch version: Astro 7, Content Collections + MDX, Tailwind v4, and a thin layer of progressive-enhancement JS (Lenis + anime.js + View Transitions). ~96% less JavaScript, the actual content back in the HTML, and the SEO/a11y/security problems fixed along the way.
+Honestly, the 2024 build was sloppy and a little juvenile. I was reaching beyond what I knew how to do cleanly, and I had about 40 dependencies, a lot of them just there to "look cool." I rebuilt it from scratch with Astro 7, Content Collections + MDX, Tailwind v4, and a thin layer of progressive-enhancement JS (Lenis + anime.js + View Transitions). It ships about 96% less JavaScript, puts the content back in the HTML, and fixes the SEO, accessibility, and security problems along the way.
 
 ## The 2024 site
 
@@ -28,9 +28,9 @@ In 2024 I built a React + Vite site for myself, biography, portfolio, blogs, wha
 <color args={["#f5f5f5"]} />
 ```
 
-One line of CSS, but instead it was 150 KB of WebGL. I'd wanted some cool 3D background effects, hated the result, kept the canvas "just in case." That pretty much summarizes the old codebase. The content here is mostly text and a handful of images and the payload was wildly heavier than the content justified.
+That one line of CSS became 150 KB of WebGL. I'd wanted some cool 3D background effects, hated the result, and kept the canvas "just in case." That pretty much summarizes the old codebase. The content here is mostly text and a handful of images, but the payload was wildly heavier than the content justified.
 
-**SEO** was another expensive failure. Pure client-rendered SPA, the served HTML is an empty div, none of the content exists in the markup a crawler first sees. `react-helmet-async` was installed but commented out, so there were zero per-route meta tags: every page shared one static `<title>saman shaiza</title>` and one description from `index.html`. No per-post titles, no Open Graph / Twitter cards — bad ranking and ugly, contentless link unfurls. No `sitemap.xml` either. The Netlify `/* → /index.html` redirect is correct for SPA routing, but it just reinforces that everything is the same empty shell.
+**SEO** was another expensive failure. It was a pure client-rendered SPA: the served HTML was an empty div, and none of the content existed in the markup crawlers saw first. `react-helmet-async` was installed but commented out, so there were zero per-route meta tags: every page shared one static `<title>saman shaiza</title>` and one description from `index.html`. No per-post titles, no Open Graph / Twitter cards — bad ranking and ugly, contentless link unfurls. No `sitemap.xml` either. The Netlify `/* → /index.html` redirect is correct for SPA routing, but it just reinforces that everything is the same empty shell.
 
 The Lighthouse numbers weren't pretty:
 
@@ -40,11 +40,11 @@ versus where we land in 2026:
 
 ![Lighthouse report for the deployed 2026 site — Performance 100, Accessibility 96, Best Practices 77, SEO 100](./lighthouse-2026-deployed.png)
 
-There's more I won't get into, but the throughline is this: this codebase showed exactly what kind of engineer I am, high velocity, experimental, messy but progress-driven, willing to ditch ideas for something better, not afraid to keep moving. Which also means a lot of dead code piles up.
+There's more I won't get into, but the old codebase shows what kind of engineer I am: I move fast, experiment, make a mess, and keep going when an idea isn't working. That also means dead code piles up.
 
 ## The 2026 rebuild
 
-I like the idea of a site that evolves. It makes the thing feel alive, so I wanted to keep the vibe and structure, just fix everything underneath: pick up an SSG (Astro is the obvious fit for a content site — zero JS shipped, MDX-native, SEO and font/image performance basically solved for free), drop R3F and every unused library, replace motion/framer-motion with anime.js, self-host the GIFs.
+I like the idea of a site that evolves. It makes the whole thing feel alive, so I wanted to keep the vibe and structure and fix what was underneath. Astro felt like the obvious fit for a content site: zero JS shipped by default, MDX-native, and SEO and font/image performance basically solved for free. I dropped R3F and the unused libraries, swapped motion/framer-motion for anime.js, and self-hosted the GIFs.
 
 The tempting instinct was to bolt on a backend so I could store more blogs, images, audio. But no, a backend makes a content site _slower_, not faster. Astro renders content to static HTML at build time; adding a runtime fetch would add a round-trip for content that never changes per request. Dumb.
 
@@ -62,13 +62,13 @@ Blogs and reviews got consolidated into one collection, so adding content is now
 
 **Self-hosted GIFs**, pulled from the Wayback Machine instead of hot-linking archive.org. Hot-linking was just silly.
 
-**Font subsetting + WOFF2 conversion**: 495 KB OTF/TTF → 173 KB WOFF2 (−65%) via `pyftsubset` from fonttools, subsetting down to the Unicode ranges the site actually uses (Latin, General Punctuation, Arrows, Misc Symbols for ★♡♪ etc.) instead of shipping full glyph inventories a personal English blog will never touch. Preload hints in `Layout.astro` for the two render-critical faces (PP Writer Regular, Hanken Grotesk).
+**Font subsetting + WOFF2 conversion** took 495 KB of OTF/TTF down to 173 KB WOFF2 (−65%). I used `pyftsubset` from fonttools to keep only the Unicode ranges the site actually uses (Latin, General Punctuation, Arrows, Misc Symbols for ★♡♪, etc.), instead of shipping full glyph inventories a personal English blog will never need. I also added preload hints in `Layout.astro` for the two render-critical faces (PP Writer Regular, Hanken Grotesk).
 
 **SEO:** per-page `<title>` and `<meta description>` plus Open Graph / Twitter card / canonical, all driven through `Layout.astro` props. `@astrojs/sitemap` generates `sitemap-index.xml` at build. Content is server-rendered into the HTML, so crawlers and link unfurls see real text, not an empty shell. `og:image` points at the logo now, so shared links look intentional.
 
-**Motion, done right:** every decorative animation respects `prefers-reduced-motion`, button hover lifts/shimmer, Lenis smooth scroll, anime.js scroll-ins, all gated. The head guard only hides `[data-animate]` when motion is allowed _and_ JS runs, so no-JS / reduced-motion users always get fully visible content — no flash, no stuck-hidden state.
+**Motion, done right:** every decorative animation respects `prefers-reduced-motion`. Button hover lifts and shimmer, Lenis smooth scroll, and anime.js scroll-ins are all gated. The head guard only hides `[data-animate]` when motion is allowed _and_ JS runs, so no-JS / reduced-motion users always get fully visible content — no flash, no stuck-hidden state.
 
-Astro 7 landed two days before I started the migration, so call it fate. Leaned hard into static output, islands, and Content Collections with the `glob` loader + Zod schema, frontmatter is type-checked at build, so a bad `date` or missing `title` fails the build instead of shipping broken. Built-in Shiki syntax highlighting meant dropping `prism-react-renderer`/`react-syntax-highlighter` too. View Transitions were the real find — SPA-style navigation with the persistent sidebar (a core part of the 2024 feel) without needing React Router at all.
+Astro 7 landed two days before I started the migration, so call it fate. I leaned hard into static output, islands, and Content Collections with the `glob` loader + Zod schema. Frontmatter is type-checked at build, so a bad `date` or missing `title` fails the build instead of shipping broken. Built-in Shiki syntax highlighting meant I could drop `prism-react-renderer` and `react-syntax-highlighter`, too. View Transitions were the real find: SPA-style navigation with the persistent sidebar (a core part of the 2024 feel), without needing React Router at all.
 
 ## The numbers (measured 2026-06-27)
 
@@ -89,6 +89,6 @@ Both built locally. 2024 measured with `npx vite build` (TS check skipped; bundl
 | Fonts                  | 3× OTF (~125 KB each), only Regular `@font-face`'d | 4× subset WOFF2, 173 KB total (−65%) + preloads                                               | done                         |
 | Lighthouse (lab)       | not measured at rebuild time                       | Perf 99 · A11y 96 · Best Practices 77→~95 after headers · SEO 100                             | —                            |
 
-519 KB of gzipped JavaScript down to 23 KB — and the old 519 KB was load-bearing, the page was blank without it, while the new 23 KB is pure enhancement: smooth scroll, scroll-in animations, SPA-style nav. The 1.85 MB raw 2024 chunk included React, React Router, **both** `framer-motion` and `motion`, and three.js — the last of which existed to render `<color args={["#f5f5f5"]} />`, a solid color one line of CSS does for free.
+519 KB of gzipped JavaScript down to 23 KB, and the old 519 KB was load-bearing, the page was blank without it, while the new 23 KB is pure enhancement: smooth scroll, scroll-in animations, SPA-style nav. The 1.85 MB raw 2024 chunk included React, React Router, **both** `framer-motion` and `motion`, and three.js, the last of which existed to render `<color args={["#f5f5f5"]} />`, a solid color one line of CSS does for free.
 
-All that being said, the 2024 site was not a mistake, it's how I learned what mattered. That there's a difference between a site that looks like it cares and one that actually does. I've uploaded the 2024 site [here](https://cosmic-croquembouche-9e1189.netlify.app/) so you can go see for yourself which one you like better.
+The 2024 site wasn't a mistake. It's how I learned what mattered: there's a difference between a site that looks like it cares and one that actually does. I've uploaded the 2024 site [here](https://cosmic-croquembouche-9e1189.netlify.app/) so you can see for yourself which one you like better.
