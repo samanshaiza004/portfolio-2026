@@ -22,7 +22,5 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
-CLAUDE.md
 AGENTS.md
-.claude/
 .vscode/

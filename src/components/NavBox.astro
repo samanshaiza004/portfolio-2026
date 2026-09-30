@@ -18,7 +18,7 @@ const SC = 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tr
 const SC_OPTS = '&color=%23178a55&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false';
 const tunes = [
   {
-    track: 'DUROW', artist: 'Skrillex & Young Miko',
+    track: 'Duro', artist: 'Skrillex & Young Miko',
     embed: `${SC}2294198822${SC_OPTS}`,
     trackUrl: 'https://soundcloud.com/skrillex/durowyoungmiko',
     artistUrl: 'https://soundcloud.com/skrillex',
@@ -54,12 +54,16 @@ const tunes = [
         
       </div>
             <p class="status-updated">last updated: {statusUpdated}</p>
-
     </div>
   </div>
   <div class="etch"></div>
 
   <nav class="nb-section nb-nav" aria-label="Primary">
+    {/* Bookmark-style tab that slides to the active link on navigation
+        (animated with anime.js). The instant background on the active
+        .navlink itself is the no-JS/first-paint fallback — this tab is a
+        purely additive enhancement, never the only indicator. */}
+    <span class="nb-nav-tab" aria-hidden="true"></span>
     {
       nav.map((n) => (
         <a
@@ -67,9 +71,9 @@ const tunes = [
           href={n.href}
           aria-current={isActive(n.href) ? 'page' : undefined}
         >
-          <picture>
+          <picture aria-hidden="true">
             <source media="(prefers-reduced-motion: reduce)" srcset={n.icon.replace('.gif', '-static.png')} />
-            <img class="nav-gif" src={n.icon} alt={n.alt} width="24" height="20" loading="lazy" />
+            <img class="nav-gif" src={n.icon} alt="" width="24" height="20" loading="lazy" />
           </picture>
           <span>{n.name}</span>
         </a>
@@ -78,7 +82,8 @@ const tunes = [
   </nav>
   <div class="etch"></div>
 
-  {/* fav tunes — real SoundCloud players */}
+  {/* fav tunes — players load on demand so three third-party embeds do not
+      dominate the initial page cost. Once loaded, transition:persist keeps them. */}
   <div class="nb-section">
     {/* heading doubles as a hover/focus tooltip trigger (ported from the 2024
         HoverCard) — cursor stays the default arrow, like the original. */}
@@ -129,6 +134,8 @@ const tunes = [
 </aside>
 
 <script>
+  import { animate } from 'animejs';
+
   // The NavBox uses transition:persist — its DOM node survives navigations, so
   // this runs ONCE per session (guarded), even though the hoisted script
   // re-executes on each view-transition swap.
@@ -206,8 +213,86 @@ const tunes = [
         else a.removeAttribute('aria-current');
       });
     };
+
+    // Bookmark tab that slides to whichever link is active. Instant on first
+    // load (nothing to slide FROM yet); animated with anime.js on navigation,
+    // so the current page has a small, tactile payoff instead of a noisy flash.
+    const navReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let navTabAnimation: ReturnType<typeof animate> | null = null;
+    const moveNavTab = (instant = false) => {
+      const navEl = document.querySelector<HTMLElement>('.nb-nav');
+      const tab = document.querySelector<HTMLElement>('.nb-nav-tab');
+      const active = navEl?.querySelector<HTMLAnchorElement>('.navlink[aria-current="page"]');
+      if (!navEl || !tab || !active) return;
+      const navRect = navEl.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+      const top = activeRect.top - navRect.top - 6;
+      const height = Math.max(22, activeRect.height - 16);
+      if (instant || navReduceMotion) {
+        navTabAnimation?.pause();
+        tab.style.transform = `translateY(${top}px)`;
+        tab.style.height = `${height}px`;
+        tab.classList.add('is-ready');
+        return;
+      }
+      tab.classList.add('is-ready');
+      navTabAnimation?.pause();
+      navTabAnimation = animate(tab, {
+        translateY: top,
+        height,
+        scaleX: [0.78, 1],
+        duration: 520,
+        ease: 'outBack(1.35)',
+      });
+    };
+
     updateActiveNav();
-    document.addEventListener('astro:after-swap', updateActiveNav);
+    moveNavTab(true);
+    document.fonts?.ready.then(() => moveNavTab(true));
+
+    // Move the marker as soon as a link is chosen. The after-swap pass below
+    // remains the source of truth once Astro has mounted the next page.
+    document.querySelectorAll<HTMLAnchorElement>('.navbox .navlink').forEach((link) => {
+      link.addEventListener('click', () => {
+        const href = link.getAttribute('href') || '';
+        const currentPath = location.pathname;
+        const isSamePage = href === '/' ? currentPath === '/' : currentPath.startsWith(href);
+        if (isSamePage) return;
+        document.querySelectorAll<HTMLAnchorElement>('.navbox .navlink').forEach((item) => {
+          if (item === link) item.setAttribute('aria-current', 'page');
+          else item.removeAttribute('aria-current');
+        });
+        moveNavTab();
+      });
+    });
+    document.addEventListener('astro:after-swap', () => {
+      updateActiveNav();
+      requestAnimationFrame(() => moveNavTab());
+    });
+    let resizeFrame = 0;
+    window.addEventListener('resize', () => {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => moveNavTab(true));
+    }, { passive: true });
+
+    // Third-party audio is opt-in. This preserves the playful sidebar while
+    // keeping SoundCloud's scripts and artwork off the critical path.
+    document.querySelectorAll<HTMLButtonElement>('[data-sc-src]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const src = button.dataset.scSrc;
+        if (!src) return;
+        const iframe = document.createElement('iframe');
+        iframe.className = 'nb-sc';
+        iframe.title = button.dataset.scTitle || 'SoundCloud player';
+        iframe.width = '100%';
+        iframe.height = '120';
+        iframe.scrolling = 'no';
+        iframe.frameBorder = '0';
+        iframe.allow = 'autoplay';
+        iframe.src = src;
+        button.replaceWith(iframe);
+      }, { once: true });
+    });
 
     // "what i'm doing rn" carousel — cross-fade through the status items under
     // the name. Auto-rotates only when motion is allowed; pauses on hover/focus
@@ -237,7 +322,7 @@ const tunes = [
 </script>
 
 <style>
-  .navbox { padding: 0; position: sticky; top: 34px; }
+  .navbox { padding: 0; position: sticky; top: 42px; }
   /* Stacked below content on mobile — don't pin the tall sidebar to the top. */
   @media (max-width: 900px) { .navbox { position: static; } }
   .nb-section { position: relative; z-index: 1; }
@@ -253,7 +338,7 @@ const tunes = [
   }
   .nb-avatar img { position: absolute; inset: -12%; width: 124%; height: 124%; object-fit: cover; display: block; }
   .nb-identity-text { min-width: 0; flex: 1; }
-  .nb-name { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: -0.01em; color: #2f2b26; line-height: 1; }
+  .nb-name { font-family: var(--font-display); font-weight: 780; font-size: 21px; letter-spacing: -0.035em; color: var(--ink); line-height: 1; }
 
   /* "what i'm doing rn" carousel — items stack and cross-fade (driven by JS) */
   .nb-doing { position: relative; margin-top: 5px; min-height: 2.7em; font-family: var(--font-sans); font-size: 12px; line-height: 1.35; }
@@ -269,10 +354,37 @@ const tunes = [
     .nb-doing-item { transition: none; }
   }
 
-  .nb-nav { padding: 14px; display: flex; flex-direction: column; gap: 2px; }
+  .nb-nav { position: relative; padding: 14px; display: flex; flex-direction: column; gap: 2px; }
   .nav-gif { width: 24px; height: 20px; object-fit: contain; flex-shrink: 0; image-rendering: auto; }
 
-  .nb-heading { font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--accent); margin-bottom: 12px; }
+  /* Bookmark tab — a small green page marker that slides to the active item.
+     It is deliberately tactile, not a second full-width active background. */
+  .nb-nav-tab {
+    z-index: 200;
+    position: absolute; left: 7px; width: 7px; border-radius: 999px;
+    background: linear-gradient(180deg, #1b8758 0%, var(--accent) 56%, #0e5c3d 100%);
+    /* box-shadow:
+      inset 1px 0 rgba(255, 255, 255, 0.38),
+      0 4px 10px rgba(20, 115, 75, 0.24);
+    opacity: 0; pointer-events: none; z-index: 2; */
+    transform-origin: center;
+    will-change: transform, height, opacity;
+    transition: opacity 0.2s ease;
+  }
+  .nb-nav-tab::before {
+    content: "";
+    position: absolute; top: 3px; left: 2px; right: 2px; height: 34%;
+    border-radius: inherit;
+    /* background: rgba(255, 255, 255, 0.34); */
+  }
+  
+  .nb-nav-tab.is-ready { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nb-nav-tab { transition: none; }
+  }
+
+  .nb-heading { font-family: var(--font-display); font-weight: 750; font-size: 15px; color: var(--accent); margin-bottom: 12px; }
   .nb-section:not(.nb-identity):not(.nb-nav):not(.nb-weather) { padding: 16px; }
 
   /* fav-tunes heading as a hover/focus tooltip trigger (2024 HoverCard port) */
@@ -316,7 +428,26 @@ const tunes = [
   }
   .nb-tunes { display: flex; flex-direction: column; gap: 14px; }
   .nb-tune { font-family: var(--font-sans); min-width: 0; }
-  .nb-sc { display: block; border-radius: 10px; border: 1px solid rgba(255,255,255,0.7); background: rgba(255,255,255,0.42); }
+  .nb-sc { display: block; border-radius: 5px; border: 1px solid rgba(32,35,31,.3); background: rgba(255,255,255,0.42); }
+  .nb-player {
+    width: 100%; min-height: 76px; display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: center;
+    gap: 9px; position: relative; overflow: hidden; padding: 10px; text-align: left; color: var(--ink);
+    border: 1px solid rgba(32,35,31,.35); border-radius: 5px; background: rgba(244,241,232,.68); cursor: pointer;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .nb-player:hover { background: rgba(228,199,91,.3); border-color: var(--accent); }
+  .nb-player-play {
+    position: relative; z-index: 1; display: grid; place-items: center; width: 32px; height: 32px; padding-left: 2px;
+    border-radius: 50%; background: var(--accent); color: white; font-size: 11px; box-shadow: 2px 2px 0 rgba(32,35,31,.3);
+  }
+  .nb-player-copy { position: relative; z-index: 1; min-width: 0; display: flex; flex-direction: column; }
+  .nb-player-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-display); font-size: 13px; }
+  .nb-player-copy > span { margin-top: 2px; font-size: 10px; color: #666b64; }
+  .nb-wave {
+    position: absolute; inset: auto 8px 8px 54px; height: 18px; opacity: .18;
+    background: repeating-linear-gradient(90deg, var(--accent) 0 2px, transparent 2px 5px);
+    clip-path: polygon(0 45%, 5% 20%, 10% 55%, 15% 5%, 20% 70%, 25% 25%, 30% 58%, 35% 10%, 40% 80%, 45% 35%, 50% 65%, 55% 15%, 60% 75%, 65% 30%, 70% 60%, 75% 10%, 80% 70%, 85% 25%, 90% 55%, 95% 15%, 100% 48%, 100% 100%, 0 100%);
+  }
   .nb-tune-links { font-size: 11px; color: #6a6359; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .nb-tune-links a { color: #6a6359; text-decoration: none; }
   .nb-tune-links a:hover { color: var(--accent); text-decoration: underline; }

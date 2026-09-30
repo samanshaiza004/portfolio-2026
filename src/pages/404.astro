@@ -1,11 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import PanelWatermark from '../components/PanelWatermark.astro';
 ---
 
 <Layout title="404 — not found" description="this page wandered off somewhere.">
   <div class="glass error-panel" data-animate>
-    <PanelWatermark />
     <img class="error-gif" src="/icons/nav-home.gif" alt="an epic horse neighing" width="64" height="44" />
     <h1 class="error-code">404</h1>
     <p class="error-lead">this page wandered off.</p>
@@ -26,8 +24,8 @@ import PanelWatermark from '../components/PanelWatermark.astro';
   }
   .error-gif { width: 64px; height: 44px; object-fit: contain; margin-bottom: 8px; }
   .error-code {
-    font-family: var(--font-display); font-weight: 700; font-size: 88px; line-height: 1;
-    letter-spacing: -0.03em; color: #221f1b;
+    font-family: var(--font-sans); font-weight: 800; font-size: 88px; line-height: 1;
+    letter-spacing: -0.06em; color: var(--ink);
   }
   .error-lead { font-family: var(--font-display); font-size: 22px; color: var(--accent); margin-top: 6px; }
   .error-sub { font-size: 15px; line-height: 1.6; color: #6a6359; max-width: 440px; margin: 12px 0 26px; }

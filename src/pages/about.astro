@@ -1,35 +1,54 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import PanelWatermark from '../components/PanelWatermark.astro';
 
 const favorites = [
   { k: 'game', v: 'the entirety of the ace attorney franchise' },
   { k: 'music', v: 'Vylet Pony, Porter Robinson, and myspacemark' },
   { k: 'drink', v: 'black coffee' },
-  { k: 'color', v: 'green' },
-  { k: 'animal', v: 'cats i guess? 🐱' },
+  { k: 'color', v: 'take a guess' },
+  { k: 'animal', v: 'cats and horses? 🐱' },
 ];
+
 ---
 
 <Layout title="about" description="a little about saman — software, music, card games, and cats.">
   <div class="glass about-panel">
-    <PanelWatermark />
     <section class="about-intro" data-animate>
-      <h1 class="about-title">about</h1>
+      <h1 class="about-title">what's saman about you?</h1>
       <p>
-        my name is saman and i like programming sometimes. I created samanshaiza.com to share my work,
-        interests, and other things going on in my life.
+        i like programming things and making things and reading things and writing things and playing things and listening to things.
       </p>
       <p>
-        Beyond programming, i enjoy making music and doing other creative things like drawing,
-        reading, or sharing cool things through blogs and technical writing.
+        i made this website to talk about those things. 
       </p>
     </section>
 
     <div class="etch"></div>
 
+    {/* <section class="about-principles" data-animate>
+      <h2 class="about-section-heading">how I like to work</h2>
+      <dl class="principles-grid">
+        {principles.map((principle) => (
+          <div class="principle">
+            <dt>{principle.k}</dt>
+            <dd>{principle.v}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <div class="etch"></div>
+*/}
     <section class="about-faves" data-animate>
-      <h2 class="about-faves-heading">★ my favorite things</h2>
+      <h2 class="about-faves-heading"><img
+              class="star"
+              src="https://web.archive.org/web/20091027065313/http://www.geocities.com/fmg1967/star.gif"
+              alt="star"
+            />my favorite things <img
+              class="star"
+              src="https://web.archive.org/web/20091027065313/http://www.geocities.com/fmg1967/star.gif"
+              alt="star"
+            /></h2>
       <dl class="faves-table">
         {
           favorites.map((f) => (
@@ -48,13 +67,19 @@ const favorites = [
 <style>
   .about-panel { padding: 0; }
 
-  .about-intro { position: relative; z-index: 1; padding: 38px 38px 28px; }
-  .about-title { font-family: var(--font-display); font-size: 46px; font-weight: 700; line-height: 1.02; letter-spacing: -0.02em; color: #221f1b; margin-bottom: 16px; }
+  .about-intro { position: relative; z-index: 1; padding: 38px 40px 30px; }
+  .about-kicker { font-size: 11px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  .about-title { font-family: var(--font-display); font-size: 54px; font-weight: 780; line-height: .95; letter-spacing: -0.055em; color: var(--ink); margin-bottom: 20px; }
   .about-intro p { font-size: 16px; line-height: 1.65; color: #4a443c; max-width: 560px; }
   .about-intro p + p { margin-top: 14px; }
 
-  .about-faves { position: relative; z-index: 1; padding: 24px 38px 32px; }
-  .about-faves-heading { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 14px; }
+  .about-principles, .about-faves { position: relative; z-index: 1; padding: 26px 40px 30px; }
+  .about-section-heading, .about-faves-heading { font-family: var(--font-sans); font-size: 24px; font-weight: 760; letter-spacing: -.025em; color: var(--ink); margin-bottom: 14px; }
+  .principles-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .principle { padding: 14px; border: 1px solid rgba(32,35,31,.25); border-radius: 5px; background: rgba(244,241,232,.58); }
+  .principle dt { font-size: 12px; font-weight: 750; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+  .principle dd { margin-top: 7px; font-size: 13px; line-height: 1.45; color: #555a53; }
+  .about-faves-heading { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 14px; display: flex; }
 
   .faves-table { display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; border: 1px solid rgba(150,138,118,0.2); }
   .faves-row { display: grid; grid-template-columns: 120px 1fr; gap: 12px; padding: 10px 14px; align-items: baseline; }
@@ -64,8 +89,9 @@ const favorites = [
 
   @media (max-width: 520px) {
     .about-intro { padding: 28px 22px 22px; }
-    .about-title { font-size: 36px; }
-    .about-faves { padding: 20px 22px 26px; }
+    .about-title { font-size: 42px; }
+    .about-principles, .about-faves { padding: 22px 22px 26px; }
+    .principles-grid { grid-template-columns: 1fr; }
     .faves-row { grid-template-columns: 90px 1fr; }
   }
 </style>

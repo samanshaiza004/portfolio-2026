@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import NavBox from '../components/NavBox.astro';
+import BackgroundShader from '../components/BackgroundShader.astro';
 import { ClientRouter } from 'astro:transitions';
 import logoAsset from '../assets/logo.jpg';
 
@@ -58,6 +59,7 @@ const ogImageUrl = Astro.site && !ogImage.startsWith('http')
     </script>
   </head>
   <body>
+    <BackgroundShader />
     <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground">
       Skip to content
     </a>
@@ -81,9 +83,11 @@ const ogImageUrl = Astro.site && !ogImage.startsWith('http')
 
     <style>
       .page {
+        position: relative;
+        z-index: 1;
         max-width: 1140px;
         margin: 0 auto;
-        padding: 34px 28px;
+        padding: 42px 28px 30px;
       }
       .shell {
         display: grid;
@@ -107,6 +111,7 @@ const ogImageUrl = Astro.site && !ogImage.startsWith('http')
 
       .site-footer {
         margin-top: 24px;
+        padding: 0 4px;
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -122,17 +127,12 @@ const ogImageUrl = Astro.site && !ogImage.startsWith('http')
     <script>
       import Lenis from 'lenis';
       import { animate } from 'animejs';
-
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // Reveal [data-animate] elements. An IntersectionObserver staggers each
-      // batch that enters the viewport (above-the-fold on load + scroll-in),
-      // cascading top-to-bottom. A throttled scroll/raf sweep is the safety net
-      // for jumps IO can't observe (the intersection ratio going 0→0 when an
-      // element is teleported past — scroll restored on reload, a fast scrollbar
-      // drag): it instantly reveals anything already scrolled above the fold.
-      // Re-run per page (initial load + each view-transition swap); the previous
-      // page's observer + listener are torn down first. Self-heals if it throws.
+      // Reveal [data-animate] elements with a staggered anime.js fade + rise
+      // as they scroll into view. Re-run per page (initial load + each
+      // view-transition swap); the previous page's wiring is torn down first.
+      // Self-heals (drops back to plain visible content) if it ever throws.
       let disposeEntrances: (() => void) | null = null;
 
       function runEntrances() {
@@ -147,8 +147,8 @@ const ogImageUrl = Astro.site && !ogImage.startsWith('http')
           const pending = new Set<Element>(els);
           let io: IntersectionObserver;
 
-          // i < 0 → instant (element already off-screen above the fold);
-          // i >= 0 → staggered entrance for a batch arriving together.
+          // i < 0 → instant (element already off-screen above the fold on
+          // load); i >= 0 → staggered entrance for a batch arriving together.
           const settle = (el: Element, i = -1) => {
             if (!pending.has(el)) return;
             pending.delete(el);
@@ -158,32 +158,25 @@ const ogImageUrl = Astro.site && !ogImage.startsWith('http')
             } else {
               animate(el, {
                 opacity: [0, 1],
-                translateY: [16, 0],
-                duration: 650,
-                delay: i * 80,   // subtle stagger for a batch entering together
+                translateY: [12, 0],
+                duration: 600,
+                delay: i * 70,   // subtle cascade for a batch entering together
                 ease: 'out(3)',
               });
             }
           };
 
           io = new IntersectionObserver((entries) => {
-            // anything reported above the fold gets revealed instantly…
             entries.forEach((e) => {
               if (!e.isIntersecting && e.boundingClientRect.top < 0) settle(e.target);
             });
-            // …and the batch entering the viewport cascades in DOM order.
             entries
               .filter((e) => e.isIntersecting && pending.has(e.target))
               .sort((a, b) =>
                 a.target.compareDocumentPosition(b.target) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
               )
               .forEach((entry, i) => settle(entry.target, i));
-          }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
-          // threshold:0 (not a fraction like 0.12) means "any part in view" —
-          // a 0.12 area threshold is never met by elements taller than ~8×
-          // the viewport (e.g. a long blog post on mobile), leaving them stuck
-          // hidden. The -8% bottom rootMargin holds the entrance until the
-          // element is a touch into view rather than firing on the first pixel.
+          }, { threshold: 0, rootMargin: '0px 0px -6% 0px' });
 
           els.forEach((el) => io.observe(el));
 
@@ -204,7 +197,6 @@ const ogImageUrl = Astro.site && !ogImage.startsWith('http')
           };
 
           window.addEventListener('scroll', onScroll, { passive: true });
-          // run once after any scroll position the browser restores post-load
           requestAnimationFrame(() => requestAnimationFrame(sweep));
 
           disposeEntrances = teardown;
@@ -215,19 +207,37 @@ const ogImageUrl = Astro.site && !ogImage.startsWith('http')
       }
 
       // One-time setup. The hoisted script re-executes on every swap, so guard
-      // the Lenis instance + listener; only the per-page entrances repeat.
+      // shared listeners; only the per-page entrance observer repeats.
       if (!(window as any).__siteInit) {
         (window as any).__siteInit = true;
 
         if (!reduce) {
-          // Lenis smooth scroll — duration 1.0 (the 2024 site's ~1.4 felt sluggish).
           const lenis = new Lenis({ duration: 1.0, smoothWheel: true });
           const raf = (time: number) => { lenis.raf(time); requestAnimationFrame(raf); };
           requestAnimationFrame(raf);
         }
 
+        // Astro preserves scroll for history navigation, which is useful. A
+        // newly clicked internal route should open at its top, especially on
+        // mobile where the persisted nav sits below the current page.
+        document.addEventListener('click', (event) => {
+          const target = event.target;
+          const link = target instanceof Element ? target.closest<HTMLAnchorElement>('a[href]') : null;
+          if (!link) return;
+          const next = new URL(link.href, location.href);
+          if (next.origin === location.origin && next.pathname !== location.pathname && !next.hash) {
+            (window as any).__resetScrollAfterSwap = true;
+          }
+        });
+
         runEntrances();                                              // initial load
-        document.addEventListener('astro:after-swap', runEntrances); // each navigation
+        document.addEventListener('astro:after-swap', () => {
+          if ((window as any).__resetScrollAfterSwap) {
+            (window as any).__resetScrollAfterSwap = false;
+            window.scrollTo(0, 0);
+          }
+          runEntrances();                                            // each navigation
+        });
       }
     </script>
   </body>

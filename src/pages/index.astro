@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import PanelWatermark from '../components/PanelWatermark.astro';
 import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
@@ -8,36 +7,66 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
 );
 const recent = posts.slice(0, 3);
 const fmt = (d: Date) =>
-  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+
+const projects = [
+  {
+    name: 'samanshaiza.com',
+    description: 'A static-first notebook for projects, reviews, and technical writing.',
+    href: '/blog/portfolio-migration-2024-to-2026-part-1/',
+    stack: ['Astro', 'MDX', 'performance'],
+  },
+  {
+    name: 'MannerHTML',
+    description: 'A tiny, framework-independent behavior layer for server-rendered HTML. ',
+    href: 'https://github.com/samanshaiza004/mannerhtml',
+    stack: ['JavaScript', 'HTML'],
+  },
+];
 ---
 
 <Layout>
   <div class="glass home-panel">
-    <PanelWatermark />
-
-    {/* welcome */}
     <section class="welcome" data-animate>
-      <div class="welcome-head">
-        <div>
-          <h1 class="welcome-title">welcome to saman!</h1>
-          <p class="welcome-sub">pronounced suh-mon</p>
-        </div>
-      </div>
+      <p class="eyebrow"><span class="status-dot"></span>always in progress</p>
+      <h1 class="welcome-title">welcome to<br />saman!<br /></h1>
+            <p class="welcome-sub">Saman is pronounced “suh-mon,” by the way. ^_^</p>
+
       <p class="welcome-intro">
-        my personal website where i like to share my work, interests, and whatever
-        else i can think of ^_^ make yourself at home. ♡
+        my personal website where i like to share my work, interests, and whatever else i can think of ^_^ make yourself at home.
       </p>
       <div class="welcome-actions">
-        <a class="green-pill" href="/about"><span>who is this?</span></a>
-        <a class="ghost-btn" href="/contact">contact</a>
+        <a class="green-pill" href="/about/"><span>who r u?</span></a>
+        <a class="ghost-btn" href="/blog/">read the notes ↓</a>
       </div>
     </section>
 
     <div class="etch"></div>
 
-    {/* recent posts */}
+    <section class="selected-work" id="selected-work">
+      <div class="section-heading" data-animate>
+        <h2>Things I’ve made</h2>
+      </div>
+      <div class="project-grid">
+        {projects.map((project) => (
+          <a class="project-card" href={project.href} data-animate>
+            <h3>{project.name}</h3>
+            <p>{project.description}</p>
+            <span class="project-stack" aria-label={`Built with ${project.stack.join(', ')}`}>
+              {project.stack.map((s) => <span class="stack-chip" aria-hidden="true">{s}</span>)}
+            </span>
+            <span class="project-arrow" aria-hidden="true">↗</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <div class="etch"></div>
+
     <section class="posts">
-      <h2 class="posts-heading" data-animate>recent posts</h2>
+      <div class="section-heading" data-animate>
+        <h2>From the workbench</h2>
+      </div>
       {
         recent.map((post, i) => (
           <>
@@ -50,7 +79,7 @@ const fmt = (d: Date) =>
           </>
         ))
       }
-      <a class="posts-all" href="/blog/">all posts →</a>
+      <a class="posts-all" href="/blog/">browse every post →</a>
     </section>
   </div>
 </Layout>
@@ -58,22 +87,60 @@ const fmt = (d: Date) =>
 <style>
   .home-panel { padding: 0; }
 
-  .welcome { position: relative; z-index: 1; padding: 38px 38px 28px; }
-  .welcome-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
-  .welcome-title { font-family: var(--font-display); font-size: 72px; font-weight: 700; line-height: 1.02; letter-spacing: -0.02em; color: #221f1b; }
-  .welcome-sub { font-family: var(--font-display); font-size: 17px; color: #8a8377; margin-top: 6px; }
-  .welcome-intro { font-size: 16px; line-height: 1.65; color: #4a443c; max-width: 540px; margin-top: 16px; }
+  .welcome { position: relative; z-index: 1; padding: 38px 40px 34px; }
+  .eyebrow, .section-kicker {
+    font-family: font-size: 11px; font-weight: 750; letter-spacing: 0.13em; text-transform: uppercase; color: var(--accent);
+  }
+  .eyebrow { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
+  .status-dot { width: 9px; height: 9px; background: var(--signal); border: 1px solid var(--ink); box-shadow: 2px 2px 0 rgba(32,35,31,.24); }
+  .welcome-title {
+    max-width: 690px; font-family: var(--font-display); font-size: clamp(3rem, 7vw, 5.6rem); font-weight: 780;  
+    line-height: .84; letter-spacing: -0.065em; color: var(--ink); text-wrap: balance;
+  }
+  .welcome-intro { font-size: 17px; line-height: 1.55; color: #3f443e; max-width: 590px; margin-top: 26px; }
+  .welcome-sub {
+    display: inline-block; font-family: var(--font-display); font-style: italic; font-size: 14px;
+    color: #797c77;margin-top: 10px; transform: rotate(-.5deg);
+  }
   .welcome-actions { display: flex; gap: 12px; align-items: center; margin-top: 24px; flex-wrap: wrap; }
 
-  .posts { position: relative; z-index: 1; padding: 24px 38px 30px; }
-  .posts-heading { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .selected-work, .posts { position: relative; z-index: 1; padding: 28px 40px 34px; scroll-margin-top: 24px; }
+  .section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; margin-bottom: 12px; }
+  .section-heading h2 { font-family: var(--font-display); font-size: 28px; line-height: 1; letter-spacing: -.035em; font-weight: 760; color: var(--ink); }
+  .project-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .project-card {
+    position: relative; min-height: 220px; display: flex; flex-direction: column; padding: 18px;
+    color: var(--ink); text-decoration: none; background: rgba(255,254,250,.55); border: 1px solid rgba(32,35,31,.3);
+    border-radius: 5px; transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+  }
+  .project-card:hover { transform: translateY(-2px); box-shadow: 2px 2px 0 rgba(32,35,31,.3); background: rgba(255,254,250,.92); }
+  .project-type { font-size: 10px; letter-spacing: .11em; text-transform: uppercase; font-weight: 750; color: var(--accent); }
+  .project-card h3 { font-family: var(--font-display); font-size: 25px; line-height: 1; margin-top: 18px; }
+  .project-card p { font-size: 14px; line-height: 1.48; color: #555a53; margin: 10px 28px 20px 0; }
+  .project-stack { margin-top: auto; display: flex; flex-wrap: wrap; gap: 6px; }
+  .stack-chip {
+    font-size: 10.5px; font-weight: 700; color: #4d514a; background: rgba(244,241,232,.55);
+    border: 1px solid rgba(32,35,31,.22); border-radius: 4px; padding: 2px 7px;
+  }
+  .project-arrow { position: absolute; right: 16px; top: 14px; font-size: 20px; color: var(--accent); }
+  .posts { padding-bottom: 30px; }
   .post-date { font-size: 12.5px; color: #8a8377; }
   .post-blurb { font-size: 14.5px; line-height: 1.55; color: #6a6359; }
   .posts-all { display: inline-block; margin-top: 12px; font-size: 14px; font-weight: 700; color: var(--accent); text-decoration: none; }
 
+  @media (prefers-reduced-motion: reduce) {
+    .project-card { transition: background .18s ease; }
+    .project-card:hover { transform: none; }
+  }
+
   @media (max-width: 520px) {
-    .welcome { padding: 28px 22px 22px; }
-    .welcome-title { font-size: 36px; }
-    .posts { padding: 20px 22px 24px; }
+    .welcome { padding: 28px 22px 26px; }
+    .welcome-title { font-size: clamp(2.75rem, 13vw, 3.5rem); line-height: .88; }
+    .welcome-intro { font-size: 16px; margin-top: 22px; }
+    .selected-work, .posts { padding: 24px 22px 26px; }
+    .section-heading { display: block; }
+    .section-heading h2 { margin-top: 6px; font-size: 25px; }
+    .project-grid { grid-template-columns: 1fr; }
+    .project-card { min-height: 195px; }
   }
 </style>

@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import PanelWatermark from '../components/PanelWatermark.astro';
 
 // Public handles only. The 2024 page also listed a phone number — deliberately
 // dropped (the brief flagged it as leaked personal info; do not carry it over).
@@ -15,10 +14,9 @@ const isExternal = (href: string | null) => !!href && href.startsWith('http');
 
 <Layout title="contact" description="get in touch with saman — email, github, linkedin, discord.">
   <div class="glass contact-panel">
-    <PanelWatermark />
     <section class="contact-head" data-animate>
-      <h1 class="contact-title">get in touch</h1>
-      <p class="contact-sub">feel free to reach out through any of these channels</p>
+      <h1 class="contact-title">Let’s talk.</h1>
+      <p class="contact-sub">For projects, software questions, music links, or a good internet rabbit hole. Email is the fastest route.</p>
     </section>
 
     <div class="etch"></div>
@@ -51,7 +49,7 @@ const isExternal = (href: string | null) => !!href && href.startsWith('http');
           })
         }
       </ul>
-      <p class="contact-foot">looking forward to connecting with you! ♡</p>
+      <p class="contact-foot">just a direct line. ♡</p>
     </section>
   </div>
 </Layout>
@@ -59,13 +57,14 @@ const isExternal = (href: string | null) => !!href && href.startsWith('http');
 <style>
   .contact-panel { padding: 0; }
 
-  .contact-head { position: relative; z-index: 1; padding: 38px 38px 24px; }
-  .contact-title { font-family: var(--font-display); font-size: 46px; font-weight: 700; line-height: 1.02; letter-spacing: -0.02em; color: #221f1b; }
-  .contact-sub { font-size: 16px; line-height: 1.6; color: #6a6359; margin-top: 8px; }
+  .contact-head { position: relative; z-index: 1; padding: 38px 40px 28px; }
+  .contact-kicker { font-size: 11px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  .contact-title { font-family: var(--font-display); font-size: 56px; font-weight: 780; line-height: .95; letter-spacing: -0.055em; color: var(--ink); }
+  .contact-sub { max-width: 540px; font-size: 16px; line-height: 1.6; color: #5a5f58; margin-top: 16px; }
 
-  .contact-body { position: relative; z-index: 1; padding: 24px 38px 32px; }
+  .contact-body { position: relative; z-index: 1; padding: 24px 40px 32px; }
   .contact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; list-style: none; margin: 0; padding: 0; }
-  .contact-card { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px 16px; }
+  .contact-card { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px 16px; border-radius: 5px; }
   a.contact-card { transition: border-color 0.15s, transform 0.15s; }
   a.contact-card:hover { border-color: var(--accent); transform: translateY(-1px); }
   .contact-value { font-size: 15px; font-weight: 600; color: #2f2b26; word-break: break-word; }
@@ -74,7 +73,7 @@ const isExternal = (href: string | null) => !!href && href.startsWith('http');
 
   @media (max-width: 560px) {
     .contact-head { padding: 28px 22px 20px; }
-    .contact-title { font-size: 36px; }
+    .contact-title { font-size: 44px; }
     .contact-body { padding: 20px 22px 26px; }
     .contact-grid { grid-template-columns: 1fr; }
   }
